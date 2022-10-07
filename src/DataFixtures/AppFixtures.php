@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Coach;
 use App\Entity\Place;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -35,6 +36,15 @@ class AppFixtures extends Fixture
             $place->setStatus("ON");
 
             $manager->persist($place);
+            $manager->flush();
+
+            $coach = New Coach();
+
+            $coach->setCoachPhoneNumber($this->faker->PhoneNumber());
+            $coach->setCoachFullName($this->faker->Name());
+            $coach->setStatu("ON");
+
+            $manager->persist($coach);
             $manager->flush();
         }
     }

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\PlaceRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PlaceRepository::class)]
 class Place
@@ -14,22 +15,30 @@ class Place
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $placeName = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $placeAddress = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $placeCity = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $placeType = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?int $placeRate = null;
 
     #[ORM\Column(length: 20)]
     private ?string $status = null;
+
+    #[ORM\ManyToOne(inversedBy: 'coachName')]
+    private ?Coach $coach = null;
 
     public function getId(): ?int
     {
@@ -104,6 +113,18 @@ class Place
     public function setStatus(string $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getCoach(): ?Coach
+    {
+        return $this->coach;
+    }
+
+    public function setCoach(?Coach $coach): self
+    {
+        $this->coach = $coach;
 
         return $this;
     }
