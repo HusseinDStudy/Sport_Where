@@ -38,6 +38,7 @@ class Place
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'coachName')]
+    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?Coach $coach = null;
 
     public function getId(): ?int
