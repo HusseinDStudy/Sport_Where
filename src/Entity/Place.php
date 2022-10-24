@@ -44,6 +44,9 @@ class Place
     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?int $placeRate = null;
 
+    #[Assert\NotBlank(message: "Une place doit avoir un statut")]
+    #[Assert\NotNull()]
+    #[Assert\Choice(choices: ['ON', 'OFF'], message: 'Le statut doit etre ON ou OFF')]
     #[ORM\Column(length: 20)]
     private ?string $status = null;
 

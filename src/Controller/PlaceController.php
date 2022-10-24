@@ -28,26 +28,37 @@ class PlaceController extends AbstractController
             'path' => 'src/Controller/PlaceController.php',
         ]);
     }
-/*
-    #[Route('/api/places', name: 'places.getAll')]
-    public function getAllPlaces(PlaceRepository $repository, SerializerInterface $serializer) : JsonResponse
+
+    #[Route('/api/places', name: 'places.getAll', methods: ['GET'])]
+    /**
+     * Retourne la liste des lieux paginés
+     *
+     * @param PlaceRepository $repository
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getAllPlaces(PlaceRepository $repository, SerializerInterface $serializer, Request $request) : JsonResponse
     {
-        $places = $repository->findAll();
-        $jsonPlaces = $serializer->serialize($places, 'json');
-        return new JsonResponse($jsonPlaces, Response::HTTP_OK, [], true);
+        $status = $request->get('status', 'ON');
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 5);
+        //$places = $repository->findWithPagination($page, $limit);
+        //$places = $repository->orderByRate();
+        $places = $repository->findPlacesByStatus($status);
+        $jsonPlaces = $serializer->serialize($places, 'json',['groups' => 'getPlace']);
+        return new JsonResponse($jsonPlaces, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
     #[Route('/api/places/{idPlace}', name: 'places.get', methods: ['GET'])]
-    public function getPlace(int $idPlace, PlaceRepository $repository, SerializerInterface $serializer) : JsonResponse
-    {
-        $place = $repository->find($idPlace);
-
-        $jsonPlaces = $serializer->serialize($place, 'json');
-
-        return $place ? new JsonResponse($jsonPlaces, Response::HTTP_OK, [], true) : new JsonResponse(null, Response::HTTP_NOT_FOUND, [], false);
-    }
-*/
-    #[Route('/api/places/{idPlace}', name: 'places.get', methods: ['GET'])]
+    /**
+     * Retourne un lieu par son id
+     *
+     * @param Place $place
+     * @param PlaceRepository $repository
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
     #[ParamConverter("place", options:['id' => 'idPlace'], class: "App\Entity\Place")]
     public function getPlace(Place $place, PlaceRepository $repository, SerializerInterface $serializer) : JsonResponse
     {
@@ -58,6 +69,14 @@ class PlaceController extends AbstractController
 
 
     #[Route('/api/places/{idPlace}', name: 'places.delete', methods: ['DELETE'])]
+    /**
+     * Supprime un lieux par son id
+     *
+     * @param Place $place
+     * @param EntityManagerInterface $entityManager
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
     #[ParamConverter("place", options:['id' => 'idPlace'], class: "App\Entity\Place")]
     public function deletePlace(Place $place, EntityManagerInterface $entityManager, SerializerInterface $serializer) : JsonResponse
     {
@@ -67,6 +86,17 @@ class PlaceController extends AbstractController
     }
 
     #[Route('/api/places', name: 'places.create', methods: ['POST'])]
+    /**
+     * Creer un lieux
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param SerializerInterface $serializer
+     * @param CoachRepository $coachRepository
+     * @param ValidatorInterface $validator
+     * @return JsonResponse
+     */
     public function createPlace(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository, ValidatorInterface $validator) : JsonResponse
     {
 
@@ -90,13 +120,30 @@ class PlaceController extends AbstractController
     }
 
     #[Route('/api/places/{id}', name: 'places.update', methods: ['PUT'])]
-    public function updatePlace(Place $place, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $CoachRepository) : JsonResponse
+    /**
+     * Modifie un lieu par son id
+     *
+     * @param Place $place
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param SerializerInterface $serializer
+     * @param CoachRepository $CoachRepository
+     * @param ValidatorInterface $validator
+     * @return JsonResponse
+     */
+    public function updatePlace(Place $place, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $CoachRepository, ValidatorInterface $validator) : JsonResponse
     {
 
         $place = $serializer->deserialize($request->getContent(), Place::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $place]);
         $place->setStatus('ON');
 
         $location = $urlGenerator->generate('places.get', ['idPlace' => $place->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $errors = $validator->validate($place);
+        if ($errors->count() > 0){
+            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
 
         $entityManager->persist($place);
         $entityManager->flush();
