@@ -27,6 +27,13 @@ class CoachController extends AbstractController
     }
 
     #[Route('/api/coachs', name: 'coach.getAll', methods: ['GET'])]
+    /**
+     * Retourne la liste des coachs
+     *
+     * @param CoachRepository $repository
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
     public function getAllCoachs(CoachRepository $repository, SerializerInterface $serializer) : JsonResponse
     {
         $coach = $repository->findAll();
@@ -36,6 +43,14 @@ class CoachController extends AbstractController
 
     #[Route('/api/coachs/{idCoach}', name: 'coach.get', methods: ['GET'])]
     #[ParamConverter("coach", options:['id' => 'idCoach'], class: "App\Entity\Coach")]
+    /**
+     * Retourne un coach par son id
+     *
+     * @param Coach $coach
+     * @param CoachRepository $repository
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
     public function getCoach(
         Coach $coach,
         CoachRepository $repository,
@@ -49,6 +64,13 @@ class CoachController extends AbstractController
 
     #[Route('/api/coachs/{idCoach}', name: 'coach.delete', methods: ['DELETE'])]
     #[ParamConverter("coach", options:['id' => 'idCoach'], class: "App\Entity\Coach")]
+    /**
+     * Supprime un coach par son id
+     *
+     * @param Coach $coach
+     * @param EntityManagerInterface $entityManager
+     * @return JsonResponse
+     */
     public function deleteCoach(Coach $coach, EntityManagerInterface $entityManager) : JsonResponse
     {
         $entityManager->remove($coach);
@@ -57,6 +79,16 @@ class CoachController extends AbstractController
     }
 
     #[Route('/api/coachs', name: 'coach.create', methods: ['POST'])]
+    /**
+     * Creer un coach
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param SerializerInterface $serializer
+     * @param CoachRepository $coachRepository
+     * @return JsonResponse
+     */
     public function createCoach(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository) : JsonResponse
     {
 
@@ -72,6 +104,16 @@ class CoachController extends AbstractController
     }
 
     #[Route('/api/coachs/{id}', name: 'coach.update', methods: ['PUT'])]
+    /**
+     * Modifie un coach par son id
+     *
+     * @param Coach $coach
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param SerializerInterface $serializer
+     * @return void
+     */
     public function updateCoach(Coach $coach, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer){
         $coach = $serializer->deserialize($request->getContent(), Coach::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $coach]);
         $coach->setStatu('ON');

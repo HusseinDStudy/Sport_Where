@@ -79,19 +79,19 @@ class PlaceRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    //findAll Place order by rate
+/**
+ * Retourne les lieux ordoner par rate
+ * @return array
+ */
     public function orderByRate(){
         $qb = $this->createQueryBuilder('place')
         ->orderBy('place.placeRate', 'DESC');
         return $qb->getQuery()->getResult();
     }
 
-    public function findPlacesByStatus($status){
-        $qb = $this->createQueryBuilder('place')
-        ->andwhere('place.status = :status')->setParameter('status', $status);
-        return $qb->getQuery()->getResult();
-    }
-
-
-
+    // public function findPlacesByStatus($status){
+    //     $qb = $this->createQueryBuilder('place')
+    //     ->andwhere('place.status = :status')->setParameter('status', $status);
+    //     return $qb->getQuery()->getResult();
+    // }
 }

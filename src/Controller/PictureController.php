@@ -17,18 +17,39 @@ use Symfony\Component\Serializer\SerializerInterface;
 class PictureController extends AbstractController
 {
     #[Route('api/pictures/{idPicture}', name: 'picture.get', methods:['GET'])]
-    public function getPicture(int $idPicture, SerializerInterface $serializer, PictureRepository $pictureRepository, UrlGeneratorInterface $urlGenerator): JsonResponse
+    /**
+     * Retourne une image par son id
+     *
+     * @param integer $idPicture
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @param PictureRepository $pictureRepository
+     * @param UrlGeneratorInterface $urlGenerator
+     * @return JsonResponse
+     */
+    public function getPicture(int $idPicture, SerializerInterface $serializer,Request $request, PictureRepository $pictureRepository, UrlGeneratorInterface $urlGenerator): JsonResponse
     {
         $picture = $pictureRepository->find($idPicture);
-        //$location = $picture->getPublicPath();
+        $relativePath = $picture->getPublicPath() . "/" . $picture->getRealPath();
+        $location = $request->getUriForPath('/');
+        $location = $location . str_replace("/assets", "assets", $relativePath);
         if($picture){
-           return new JsonResponse($serializer->serialize($picture, 'json', ["groups" => 'getPicture']), JsonResponse::HTTP_OK, [], true);
+           return new JsonResponse($serializer->serialize($picture, 'json', ["groups" => 'getPicture']), JsonResponse::HTTP_OK, ["Location" => $location], true);
         }
         return new JsonResponse(null, JsonResponse::HTTP_NOT_FOUND);
         
     }
 
     #[Route('api/pictures', name: 'pictures.create', methods:['POST'])]
+    /**
+     * Creer une image
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param SerializerInterface $serializer
+     * @param UrlGeneratorInterface $urlGenerator
+     * @return JsonResponse
+     */
     public function createPicture(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator): JsonResponse
     {
 
