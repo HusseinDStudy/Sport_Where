@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CoachRepository::class)]
 class Coach
@@ -19,6 +20,8 @@ class Coach
     #[ORM\OneToMany(mappedBy: 'coach', targetEntity: Place::class)]
     private Collection $coachName;
 
+    #[Assert\NotBlank(message: "Un coach doit avoir un numéro de téléphone")]
+    #[Assert\NotNull()]
     #[ORM\Column(length: 20, nullable: true)]
     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $coachPhoneNumber = null;
@@ -26,6 +29,9 @@ class Coach
     #[ORM\Column(length: 20)]
     private ?string $statu = null;
 
+    #[Assert\NotBlank(message: "Un coach doit avoir un nom")]
+    #[Assert\NotNull()]
+    #[Assert\Length(min: 3, minMessage: "Le nom de la place doit faire plus de {{ limit }} caracteres")]
     #[ORM\Column(length: 255)]
     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $coachFullName = null;
