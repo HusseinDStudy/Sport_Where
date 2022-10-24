@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\PlaceRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PlaceRepository::class)]
 class Place
@@ -14,18 +15,27 @@ class Place
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank(message: "Une place doit avoir un nom")]
+    #[Assert\NotNull()]
+    #[Assert\Length(min: 3, minMessage: "Le nom de la place doit faire plus de {{ limit }} caracteres")]
     #[ORM\Column(length: 255)]
     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $placeName = null;
 
+    #[Assert\NotBlank(message: "Une place doit avoir une addresse")]
+    #[Assert\NotNull()]
     #[ORM\Column(length: 255)]
     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $placeAddress = null;
 
+    #[Assert\NotBlank(message: "Une place doit avoir une ville")]
+    #[Assert\NotNull()]
     #[ORM\Column(length: 255)]
     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $placeCity = null;
 
+    #[Assert\NotBlank(message: "Une place doit avoir un type")]
+    #[Assert\NotNull()]
     #[ORM\Column(length: 255)]
     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $placeType = null;

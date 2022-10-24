@@ -10,11 +10,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class PlaceController extends AbstractController
 {
@@ -65,7 +67,7 @@ class PlaceController extends AbstractController
     }
 
     #[Route('/api/places', name: 'places.create', methods: ['POST'])]
-    public function createPlace(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository) : JsonResponse
+    public function createPlace(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository, ValidatorInterface $validator) : JsonResponse
     {
 
         $place = $serializer->deserialize($request->getContent(), Place::class, 'json');
@@ -75,6 +77,10 @@ class PlaceController extends AbstractController
         $idCoach = $content["idCoach"];
         $place->setCoach($coachRepository->find($idCoach));
 
+        $errors = $validator->validate($place);
+        if ($errors->count() > 0){
+            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
         $entityManager->persist($place);
         $entityManager->flush();
 
