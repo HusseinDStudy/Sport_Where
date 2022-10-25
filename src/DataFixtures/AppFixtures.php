@@ -4,6 +4,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Coach;
 use App\Entity\Place;
+use App\Entity\RatePlaces;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -63,12 +64,9 @@ private $userPasswordHasher;
             $place->setPlaceAddress($this->faker->streetAddress());
             $place->setPlaceCity($this->faker->randomElements(["Lyon","Paris","Marseille","Bordeaux","Brest","Strasbourg","Dijon","Nice","Nantes","Clermont-Ferrand","Toulon","Toulouse"])[0]);
             $place->setPlaceType($this->faker->randomElements(["Salle de musculation","Parc de street workout","Salle de crossfit"])[0]);
-            $place->setPlaceRate($this->faker->numberBetween(0, 5 ));
+            //$place->setPlaceRate($this->faker->numberBetween(0, 5 ));
             $place->setStatus("ON");
             $place->setDept($this->faker->numberBetween(1, 95 ));
-
-            $manager->persist($place);
-            $manager->flush();
 
             $coach = New Coach();
 
@@ -78,6 +76,23 @@ private $userPasswordHasher;
 
             $manager->persist($coach);
             $manager->flush();
+
+            $place->setCoach($coach);
+
+            $manager->persist($place);
+            $manager->flush();
+
+            for ($j=0; $j < 3 ; $j++) {
+                $ratePlaces = New RatePlaces();
+
+                $ratePlaces->setIdPlace($place);
+                $ratePlaces->setIdUser($userUser);
+                $ratePlaces->setRate($this->faker->numberBetween(0, 5 ));
+    
+                $manager->persist($ratePlaces);
+                $manager->flush();
+            }
+            
         }
     }
 }
