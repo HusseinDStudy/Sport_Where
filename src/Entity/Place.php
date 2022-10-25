@@ -34,6 +34,12 @@ class Place
     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $placeCity = null;
 
+    #[Assert\NotBlank(message: "Une place doit avoir un departement")]
+    #[Assert\NotNull()]
+    #[ORM\Column]
+    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    private ?int $dept = null;
+
     #[Assert\NotBlank(message: "Une place doit avoir un type")]
     #[Assert\NotNull()]
     #[ORM\Column(length: 255)]
@@ -139,6 +145,18 @@ class Place
     public function setCoach(?Coach $coach): self
     {
         $this->coach = $coach;
+
+        return $this;
+    }
+
+    public function getDept(): ?int
+    {
+        return $this->dept;
+    }
+
+    public function setDept(int $dept): self
+    {
+        $this->dept = $dept;
 
         return $this;
     }

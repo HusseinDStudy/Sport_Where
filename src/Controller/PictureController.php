@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Picture;
 use App\Repository\PictureRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,8 +17,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class PictureController extends AbstractController
 {
-    #[Route('api/pictures/{idPicture}', name: 'picture.get', methods:['GET'])]
-    /**
+        /**
      * Retourne une image par son id
      *
      * @param integer $idPicture
@@ -27,6 +27,8 @@ class PictureController extends AbstractController
      * @param UrlGeneratorInterface $urlGenerator
      * @return JsonResponse
      */
+    #[Route('api/pictures/{idPicture}', name: 'picture.get', methods:['GET'])]
+    #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function getPicture(int $idPicture, SerializerInterface $serializer,Request $request, PictureRepository $pictureRepository, UrlGeneratorInterface $urlGenerator): JsonResponse
     {
         $picture = $pictureRepository->find($idPicture);
@@ -40,7 +42,6 @@ class PictureController extends AbstractController
         
     }
 
-    #[Route('api/pictures', name: 'pictures.create', methods:['POST'])]
     /**
      * Creer une image
      *
@@ -50,11 +51,13 @@ class PictureController extends AbstractController
      * @param UrlGeneratorInterface $urlGenerator
      * @return JsonResponse
      */
+    #[Route('api/pictures', name: 'pictures.create', methods:['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function createPicture(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator): JsonResponse
     {
 
         $picture = new Picture();
-        $picture->setPublicPath("/assets/pictures");
+        $picture->setPublicPath("/images/pictures");
         $picture->setStatus('ON');
         $files = $request->files->get('file');
         $picture->setFile($files);

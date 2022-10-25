@@ -4,10 +4,12 @@ namespace App\DataFixtures;
 
 use App\Entity\Coach;
 use App\Entity\Place;
+use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Generator;
 use Faker\Factory;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
@@ -16,12 +18,41 @@ class AppFixtures extends Fixture
      */
 
     private Generator $faker;
-    public function __construct()
+
+/**
+ * class pour hasheant le mdp
+ * @var UserPasswordHasherInterface
+ */
+private $userPasswordHasher;
+
+    public function __construct(UserPasswordHasherInterface $userPasswordHasher)
     {
         $this->faker = Factory::create("fr_FR");
+        $this->userPasswordHasher = $userPasswordHasher;
     }
     public function load(ObjectManager $manager): void
     {
+        $userNumber = 10;
+
+        //Authneticated Users
+        for($i=0; $i < $userNumber; $i++){
+            $userUser = new User();
+            $password = $this->faker->password(2, 6);
+            $userUser->setUsername($this->faker->userName() . '@' . $password)
+            ->setRoles(["ROLE_USER"])
+            ->setPassword($this->userPasswordHasher->hashPassword($userUser, $password));
+            $manager->persist($userUser);
+        }
+
+        //Authneticated Users
+        $adminUser = new User();
+        $password = "password";
+        $adminUser->setUsername('admin')
+        ->setRoles(["ROLE_ADMIN"])
+        ->setPassword($this->userPasswordHasher->hashPassword($adminUser, $password));
+        $manager->persist($adminUser);
+    
+
         // $product = new Product();
         // $manager->persist($product);
 
@@ -34,6 +65,7 @@ class AppFixtures extends Fixture
             $place->setPlaceType($this->faker->randomElements(["Salle de musculation","Parc de street workout","Salle de crossfit"])[0]);
             $place->setPlaceRate($this->faker->numberBetween(0, 5 ));
             $place->setStatus("ON");
+            $place->setDept($this->faker->numberBetween(1, 95 ));
 
             $manager->persist($place);
             $manager->flush();
