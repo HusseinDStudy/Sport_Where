@@ -9,6 +9,20 @@ use Doctrine\ORM\Mapping as ORM;
 //use Symfony\Component\Serializer\Annotation\Groups;
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Hateoas\Configuration\Annotation as Hateoas;
+
+/**
+ * @Hateoas\Relation(
+ *     "self",
+ *     href=@Hateoas\Route(
+ *     "places.get",
+ *     parameters={
+ *      "idPlace" = "expr(object.getId())"
+ *     }),
+ *     exclusion = @Hateoas\Exclusion(groups="getPlace")
+ *
+ * )
+ */
 
 
 use Hateoas\Configuration\Annotation as Hateoas;

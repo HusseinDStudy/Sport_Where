@@ -62,7 +62,7 @@ class PlaceController extends AbstractController
             $limit = $request->get('limit', 5);
             $places = $repository->findAllCustom($page, $limit);
             $context = SerializationContext::create()->setGroups(['getPlace']);
-            return $serializer->serialize($places, 'json');
+            return $serializer->serialize($places, 'json', $context);
         });
         //$jsonPlaces = $serializer->serialize($places, 'json',['groups' => 'getPlace']);
         return new JsonResponse($jsonPlaces, Response::HTTP_OK, ['accept' => 'json'], true);
@@ -85,7 +85,7 @@ class PlaceController extends AbstractController
         $jsonPlaces = $cache->get($idCache, function (ItemInterface $item) use ($place, $serializer){
             $item->tag("placeCache");
             $context = SerializationContext::create()->setGroups(['getPlace']);
-            return $serializer->serialize($place, 'json');
+            return $serializer->serialize($place, 'json', $context);
         });
         //$jsonPlaces = $serializer->serialize($place, 'json',['groups' => 'getPlace']);
         return new JsonResponse($jsonPlaces, Response::HTTP_OK, ['accept' => 'json'], true);
