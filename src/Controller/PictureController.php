@@ -12,8 +12,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Serializer\SerializerInterface;
+//use Symfony\Component\Serializer\Serializer;
+//use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface;
+use JMS\Serializer\Serializer;
+use JMS\Serializer\SerializationContext;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
@@ -42,7 +45,8 @@ class PictureController extends AbstractController
         $jsonPicture = $cache->get($idCache, function (ItemInterface $item) use ($picture, $serializer){
             $item->tag("pictureCache");
             if($picture){
-                return $serializer->serialize($picture, 'json', ["groups" => 'getPicture']);
+                $context = SerializationContext::create()->setGroups(['getPicture']);
+                return $serializer->serialize($picture, 'json', $context);
             }else{
                 return null;
             }
@@ -79,7 +83,8 @@ class PictureController extends AbstractController
         $entityManager->flush();
 
         $location = $urlGenerator->generate('picture.get', ['idPicture' => $picture->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
-        $jsonPicture = $serializer->serialize($picture, "json", ['groups' => 'getPicture']);
+        $context = SerializationContext::create()->setGroups(['getPicture']);
+        $jsonPicture = $serializer->serialize($picture, "json", $context);
         return new JsonResponse($jsonPicture, JsonResponse::HTTP_CREATED, ['Location' => $location], true);
     }
 }
