@@ -65,7 +65,7 @@ class PlaceRepository extends ServiceEntityRepository
 //    }
 
 /**
- * Retourne les lieux actif paginés par $page a la limite $limit
+ * Retourne les lieux paginés par $page a la limite $limit
  * @param int $page
  * @param int $limit de lieux par page
  * @return array
@@ -75,23 +75,43 @@ class PlaceRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('place');
         $qb->setMaxResults($limit);
         $qb->setFirstResult(($page - 1) * $limit);
-        $qb->where('place.status = \'on\'');
         return $qb->getQuery()->getResult();
     }
 
-    //findAll Place order by rate
+    /**
+ * Retourne les lieux actif paginés par $page a la limite $limit ordonné de manière decroissante
+ * @param int $page
+ * @param int $limit de lieux par page
+ * @return array
+ */
+    public function findAllCustom($page, $limit){
+        $qb = $this->createQueryBuilder('place');
+        $qb->setMaxResults($limit);
+        $qb->setFirstResult(($page - 1) * $limit);
+        $qb->where('place.status = \'on\'');
+        $qb->orderBy('place.placeRate', 'DESC');
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Retourne les lieux ordoner par rate
+     * @return array
+     */
     public function orderByRate(){
         $qb = $this->createQueryBuilder('place')
         ->orderBy('place.placeRate', 'DESC');
         return $qb->getQuery()->getResult();
     }
 
-    public function findPlacesByStatus($status){
-        $qb = $this->createQueryBuilder('place')
-        ->andwhere('place.status = :status')->setParameter('status', $status);
-        return $qb->getQuery()->getResult();
-    }
+    // public function findPlacesByStatus($status){
+    //     $qb = $this->createQueryBuilder('place')
+    //     ->andwhere('place.status = :status')->setParameter('status', $status);
+    //     return $qb->getQuery()->getResult();
+    // }
 
-
-
+    /**
+     * Retourne les lieux sportif selon son département
+     * @param int $departement
+     * @return array
+     */
 }

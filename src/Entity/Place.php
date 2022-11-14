@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PlaceRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -34,15 +36,21 @@ class Place
     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $placeCity = null;
 
+    #[Assert\NotBlank(message: "Une place doit avoir un departement")]
+    #[Assert\NotNull()]
+    #[ORM\Column]
+    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    private ?int $dept = null;
+
     #[Assert\NotBlank(message: "Une place doit avoir un type")]
     #[Assert\NotNull()]
     #[ORM\Column(length: 255)]
     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $placeType = null;
 
-    #[ORM\Column(nullable: true)]
-    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
-    private ?int $placeRate = null;
+    // #[ORM\Column(nullable: true)]
+    // #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    // private ?int $placeRate = null;
 
     #[Assert\NotBlank(message: "Une place doit avoir un statut")]
     #[Assert\NotNull()]
@@ -53,6 +61,14 @@ class Place
     #[ORM\ManyToOne(inversedBy: 'coachName')]
     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?Coach $coach = null;
+
+    #[ORM\OneToMany(mappedBy: 'idPlace', targetEntity: RatePlaces::class)]
+    private Collection $ratePlaces;
+
+    public function __construct()
+    {
+        $this->ratePlaces = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -107,17 +123,17 @@ class Place
         return $this;
     }
 
-    public function getPlaceRate(): ?int
-    {
-        return $this->placeRate;
-    }
+    // public function getPlaceRate(): ?int
+    // {
+    //     return $this->placeRate;
+    // }
 
-    public function setPlaceRate(?int $placeRate): self
-    {
-        $this->placeRate = $placeRate;
+    // public function setPlaceRate(?int $placeRate): self
+    // {
+    //     $this->placeRate = $placeRate;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     public function getStatus(): ?string
     {
@@ -139,6 +155,48 @@ class Place
     public function setCoach(?Coach $coach): self
     {
         $this->coach = $coach;
+
+        return $this;
+    }
+
+    public function getDept(): ?int
+    {
+        return $this->dept;
+    }
+
+    public function setDept(int $dept): self
+    {
+        $this->dept = $dept;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RatePlaces>
+     */
+    public function getRatePlaces(): Collection
+    {
+        return $this->ratePlaces;
+    }
+
+    public function addRatePlace(RatePlaces $ratePlace): self
+    {
+        if (!$this->ratePlaces->contains($ratePlace)) {
+            $this->ratePlaces->add($ratePlace);
+            $ratePlace->setIdPlace($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRatePlace(RatePlaces $ratePlace): self
+    {
+        if ($this->ratePlaces->removeElement($ratePlace)) {
+            // set the owning side to null (unless already changed)
+            if ($ratePlace->getIdPlace() === $this) {
+                $ratePlace->setIdPlace(null);
+            }
+        }
 
         return $this;
     }

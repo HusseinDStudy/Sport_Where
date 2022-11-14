@@ -6,6 +6,7 @@ use App\Entity\Place;
 use App\Repository\CoachRepository;
 use App\Repository\PlaceRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,6 +15,7 @@ use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mime\Message;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -29,8 +31,7 @@ class PlaceController extends AbstractController
         ]);
     }
 
-    #[Route('/api/places', name: 'places.getAll', methods: ['GET'])]
-    /**
+        /**
      * Retourne la liste des lieux paginés
      *
      * @param PlaceRepository $repository
@@ -38,6 +39,8 @@ class PlaceController extends AbstractController
      * @param Request $request
      * @return JsonResponse
      */
+    #[Route('/api/places', name: 'places.getAll', methods: ['GET'])]
+    #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function getAllPlaces(PlaceRepository $repository, SerializerInterface $serializer, Request $request) : JsonResponse
     {
         $status = $request->get('status', 'ON');
@@ -45,13 +48,13 @@ class PlaceController extends AbstractController
         $limit = $request->get('limit', 5);
         //$places = $repository->findWithPagination($page, $limit);
         //$places = $repository->orderByRate();
-        $places = $repository->findPlacesByStatus($status);
+        //$places = $repository->findPlacesByStatus($status);
+        $places = $repository->findAllCustom($page, $limit);
         $jsonPlaces = $serializer->serialize($places, 'json',['groups' => 'getPlace']);
         return new JsonResponse($jsonPlaces, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
-    #[Route('/api/places/{idPlace}', name: 'places.get', methods: ['GET'])]
-    /**
+        /**
      * Retourne un lieu par son id
      *
      * @param Place $place
@@ -59,6 +62,8 @@ class PlaceController extends AbstractController
      * @param SerializerInterface $serializer
      * @return JsonResponse
      */
+    #[Route('/api/places/{idPlace}', name: 'places.get', methods: ['GET'])]
+    #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     #[ParamConverter("place", options:['id' => 'idPlace'], class: "App\Entity\Place")]
     public function getPlace(Place $place, PlaceRepository $repository, SerializerInterface $serializer) : JsonResponse
     {
@@ -67,8 +72,6 @@ class PlaceController extends AbstractController
         return new JsonResponse($jsonPlaces, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
-
-    #[Route('/api/places/{idPlace}', name: 'places.delete', methods: ['DELETE'])]
     /**
      * Supprime un lieux par son id
      *
@@ -77,6 +80,8 @@ class PlaceController extends AbstractController
      * @param SerializerInterface $serializer
      * @return JsonResponse
      */
+    #[Route('/api/places/{idPlace}', name: 'places.delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     #[ParamConverter("place", options:['id' => 'idPlace'], class: "App\Entity\Place")]
     public function deletePlace(Place $place, EntityManagerInterface $entityManager, SerializerInterface $serializer) : JsonResponse
     {
@@ -85,7 +90,6 @@ class PlaceController extends AbstractController
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
-    #[Route('/api/places', name: 'places.create', methods: ['POST'])]
     /**
      * Creer un lieux
      *
@@ -97,6 +101,8 @@ class PlaceController extends AbstractController
      * @param ValidatorInterface $validator
      * @return JsonResponse
      */
+    #[Route('/api/places', name: 'places.create', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function createPlace(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository, ValidatorInterface $validator) : JsonResponse
     {
 
@@ -119,7 +125,6 @@ class PlaceController extends AbstractController
         return new JsonResponse($jsonPlace, JsonResponse::HTTP_CREATED, ['Location' => $location], true);
     }
 
-    #[Route('/api/places/{id}', name: 'places.update', methods: ['PUT'])]
     /**
      * Modifie un lieu par son id
      *
@@ -132,6 +137,8 @@ class PlaceController extends AbstractController
      * @param ValidatorInterface $validator
      * @return JsonResponse
      */
+    #[Route('/api/places/{id}', name: 'places.update', methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function updatePlace(Place $place, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $CoachRepository, ValidatorInterface $validator) : JsonResponse
     {
 

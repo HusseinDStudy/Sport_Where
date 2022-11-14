@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Coach;
 use App\Repository\CoachRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,7 +27,15 @@ class CoachController extends AbstractController
         ]);
     }
 
+        /**
+     * Retourne la liste des coachs
+     *
+     * @param CoachRepository $repository
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
     #[Route('/api/coachs', name: 'coach.getAll', methods: ['GET'])]
+    #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function getAllCoachs(CoachRepository $repository, SerializerInterface $serializer) : JsonResponse
     {
         $coach = $repository->findAll();
@@ -34,7 +43,16 @@ class CoachController extends AbstractController
         return new JsonResponse($jsonCoachs, Response::HTTP_OK, [], true);
     }
 
+        /**
+     * Retourne un coach par son id
+     *
+     * @param Coach $coach
+     * @param CoachRepository $repository
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
     #[Route('/api/coachs/{idCoach}', name: 'coach.get', methods: ['GET'])]
+    #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     #[ParamConverter("coach", options:['id' => 'idCoach'], class: "App\Entity\Coach")]
     public function getCoach(
         Coach $coach,
@@ -47,7 +65,15 @@ class CoachController extends AbstractController
         return new JsonResponse($jsonPlaces, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
+        /**
+     * Supprime un coach par son id
+     *
+     * @param Coach $coach
+     * @param EntityManagerInterface $entityManager
+     * @return JsonResponse
+     */
     #[Route('/api/coachs/{idCoach}', name: 'coach.delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     #[ParamConverter("coach", options:['id' => 'idCoach'], class: "App\Entity\Coach")]
     public function deleteCoach(Coach $coach, EntityManagerInterface $entityManager) : JsonResponse
     {
@@ -56,7 +82,18 @@ class CoachController extends AbstractController
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
+        /**
+     * Creer un coach
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param SerializerInterface $serializer
+     * @param CoachRepository $coachRepository
+     * @return JsonResponse
+     */
     #[Route('/api/coachs', name: 'coach.create', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function createCoach(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository) : JsonResponse
     {
 
@@ -71,7 +108,18 @@ class CoachController extends AbstractController
         return new JsonResponse($jsonPlace, JsonResponse::HTTP_CREATED, ['Location' => $location], true);
     }
 
+        /**
+     * Modifie un coach par son id
+     *
+     * @param Coach $coach
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param SerializerInterface $serializer
+     * @return void
+     */
     #[Route('/api/coachs/{id}', name: 'coach.update', methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function updateCoach(Coach $coach, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer){
         $coach = $serializer->deserialize($request->getContent(), Coach::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $coach]);
         $coach->setStatu('ON');
