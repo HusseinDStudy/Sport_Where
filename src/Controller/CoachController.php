@@ -14,7 +14,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\SerializerInterface;
+//use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface;
+use JMS\Serializer\Serializer;
+use JMS\Serializer\SerializationContext;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
@@ -44,7 +47,8 @@ class CoachController extends AbstractController
         $jsonCoachs = $cache->get($idCache, function (ItemInterface $item) use ($repository, $serializer){
             $coach = $repository->findAll();
             $item->tag("coachCache");
-            return $serializer->serialize($coach, 'json',['groups' => 'getPlace']);
+            $context = SerializationContext::create()->setGroups(['getPlace']);
+            return $serializer->serialize($coach, 'json',$context);
         });
 
         //$jsonCoachs = $serializer->serialize($coach, 'json',['groups' => 'getPlace']);
@@ -72,7 +76,8 @@ class CoachController extends AbstractController
         $idCache = 'getCoach';
         $jsonPlaces = $cache->get($idCache, function (ItemInterface $item) use ($coach, $repository, $serializer){
             $item->tag("coachCache");
-            return $serializer->serialize($coach, 'json',['groups' => 'getCoach']);
+            $context = SerializationContext::create()->setGroups(['getCoach']);
+            return $serializer->serialize($coach, 'json',$context);
         });
         //$jsonPlaces = $serializer->serialize($coach, 'json',['groups' => 'getCoach']);
 
@@ -119,7 +124,8 @@ class CoachController extends AbstractController
         $entityManager->flush();
 
         $location = $urlGenerator->generate('coach.get', ['idCoach' => $coach->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
-        $jsonPlace = $serializer->serialize($coach, "json", ['groups' => 'getCoach']);
+        $context = SerializationContext::create()->setGroups(['getCoach']);
+        $jsonPlace = $serializer->serialize($coach, "json", $context);
         return new JsonResponse($jsonPlace, JsonResponse::HTTP_CREATED, ['Location' => $location], true);
     }
 
@@ -137,7 +143,12 @@ class CoachController extends AbstractController
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function updateCoach(Coach $coach, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, TagAwareCacheInterface $cache){
         $cache->invalidateTags(["coachCache"]);
-        $coach = $serializer->deserialize($request->getContent(), Coach::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $coach]);
+        $coach = $serializer->deserialize($request->getContent(), Coach::class, 'json');//[AbstractNormalizer::OBJECT_TO_POPULATE => $coach]
+        $updatedCoach = $serializer->deserialize($request->getContent(), Coach::class, 'json');
+
+        $coach->setCoachFullName($updatedCoach->getCoachFullName() ? $updatedCoach->getCoachFullName() : $coach->getCoachFullName() );
+        $coach->setCoachPhoneNumber($updatedCoach->getCoachPhoneNumber() ? $updatedCoach->getCoachPhoneNumber() : $coach->getCoachPhoneNumber() );
+
         $coach->setStatu('ON');
         
         $location = $urlGenerator->generate('coach.get', ['idCoach' => $coach->getId()], UrlGeneratorInterface::ABSOLUTE_URL);

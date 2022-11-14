@@ -5,9 +5,25 @@ namespace App\Entity;
 use App\Repository\CoachRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Symfony\Component\Serializer\Annotation\Groups;
+//use Symfony\Component\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+
+use Hateoas\Configuration\Annotation as Hateoas;
+
+/**
+ * @Hateoas\Relation(
+ *     "self",
+ *     href=@Hateoas\Route(
+ *     "coach.get",
+ *     parameters={
+ *      "idCoach" = "expr(object.getId())"
+ *     }),
+ *     exclusion = @Hateoas\Exclusion(groups="getCoach")
+ *
+ * )
+ */
 
 #[ORM\Entity(repositoryClass: CoachRepository::class)]
 class Coach

@@ -13,7 +13,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Serializer\SerializerInterface;
+//use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface;
+use JMS\Serializer\Serializer;
+use JMS\Serializer\SerializationContext;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\Message;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -58,7 +61,8 @@ class PlaceController extends AbstractController
             $page = $request->get('page', 1);
             $limit = $request->get('limit', 5);
             $places = $repository->findAllCustom($page, $limit);
-            return $serializer->serialize($places, 'json',['groups' => 'getPlace']);
+            $context = SerializationContext::create()->setGroups(['getPlace']);
+            return $serializer->serialize($places, 'json', $context);
         });
         //$jsonPlaces = $serializer->serialize($places, 'json',['groups' => 'getPlace']);
         return new JsonResponse($jsonPlaces, Response::HTTP_OK, ['accept' => 'json'], true);
@@ -80,7 +84,8 @@ class PlaceController extends AbstractController
         $idCache = 'getPlace';
         $jsonPlaces = $cache->get($idCache, function (ItemInterface $item) use ($place, $serializer){
             $item->tag("placeCache");
-            return $serializer->serialize($place, 'json',['groups' => 'getPlace']);
+            $context = SerializationContext::create()->setGroups(['getPlace']);
+            return $serializer->serialize($place, 'json', $context);
         });
         //$jsonPlaces = $serializer->serialize($place, 'json',['groups' => 'getPlace']);
         return new JsonResponse($jsonPlaces, Response::HTTP_OK, ['accept' => 'json'], true);
@@ -136,7 +141,8 @@ class PlaceController extends AbstractController
         $entityManager->flush();
 
         $location = $urlGenerator->generate('places.get', ['idPlace' => $place->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
-        $jsonPlace = $serializer->serialize($place, "json", ['groups' => 'getPlace']);
+        $context = SerializationContext::create()->setGroups(['getPlace']);
+        $jsonPlace = $serializer->serialize($place, "json", $context);
         return new JsonResponse($jsonPlace, JsonResponse::HTTP_CREATED, ['Location' => $location], true);
     }
 
@@ -157,7 +163,17 @@ class PlaceController extends AbstractController
     public function updatePlace(Place $place, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $CoachRepository, ValidatorInterface $validator, TagAwareCacheInterface $cache) : JsonResponse
     {
         $cache->invalidateTags(["placeCache"]);
-        $place = $serializer->deserialize($request->getContent(), Place::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $place]);
+        //$place = $serializer->deserialize($request->getContent(), Place::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $place]);
+        $updatedPlace = $serializer->deserialize($request->getContent(), Place::class, 'json');
+
+        $place->setPlaceName($updatedPlace->getPlaceName() ? $updatedPlace->getPlaceName() : $place->getPlaceName() );
+        $place->setPlaceAddress($updatedPlace->getPlaceAddress() ? $updatedPlace->getPlaceAddress() : $place->getPlaceAddress() );
+        $place->setPlaceCity($updatedPlace->getPlaceCity() ? $updatedPlace->getPlaceCity() : $place->getPlaceCity() );
+        $place->setPlaceType($updatedPlace->getPlaceType() ? $updatedPlace->getPlaceType() : $place->getPlaceType() );
+        $place->setPlaceRate($updatedPlace->getPlaceRate() ? $updatedPlace->getPlaceRate() : $place->getPlaceRate() );
+        $place->setCoach($updatedPlace->getCoach() ? $updatedPlace->getCoach() : $place->getCoach() );
+        $place->setPlaceRate($updatedPlace->getPlaceRate() ? $updatedPlace->getPlaceRate() : $place->getPlaceRate() );
+        $place->setDept($updatedPlace->getDept() ? $updatedPlace->getDept() : $place->getDept() );
         $place->setStatus('ON');
 
         $location = $urlGenerator->generate('places.get', ['idPlace' => $place->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
@@ -169,7 +185,8 @@ class PlaceController extends AbstractController
 
         $entityManager->persist($place);
         $entityManager->flush();
-        $jsonPlace = $serializer->serialize($place, "json", ['getPlace']);
+        $context = SerializationContext::create()->setGroups(['getPlace']);
+        $jsonPlace = $serializer->serialize($place, "json", $context);
         return new JsonResponse($jsonPlace, JsonResponse::HTTP_CREATED, ['Location' => $location], true);
     }
 }
