@@ -48,9 +48,9 @@ class Place
     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
     private ?string $placeType = null;
 
-    // #[ORM\Column(nullable: true)]
-    // #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
-    // private ?int $placeRate = null;
+     #[ORM\Column(nullable: true)]
+     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+     private ?int $placeRate = null;
 
     #[Assert\NotBlank(message: "Une place doit avoir un statut")]
     #[Assert\NotNull()]
@@ -123,17 +123,17 @@ class Place
         return $this;
     }
 
-    // public function getPlaceRate(): ?int
-    // {
-    //     return $this->placeRate;
-    // }
+     public function getPlaceRate(): ?int
+     {
+         return $this->placeRate;
+     }
 
-    // public function setPlaceRate(?int $placeRate): self
-    // {
-    //     $this->placeRate = $placeRate;
+     public function setPlaceRate(?int $placeRate): self
+     {
+         $this->placeRate = $placeRate;
 
-    //     return $this;
-    // }
+         return $this;
+     }
 
     public function getStatus(): ?string
     {

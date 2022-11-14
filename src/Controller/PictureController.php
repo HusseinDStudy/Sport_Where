@@ -14,10 +14,12 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class PictureController extends AbstractController
 {
-        /**
+    /**
      * Retourne une image par son id
      *
      * @param integer $idPicture
@@ -29,17 +31,27 @@ class PictureController extends AbstractController
      */
     #[Route('api/pictures/{idPicture}', name: 'picture.get', methods:['GET'])]
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
-    public function getPicture(int $idPicture, SerializerInterface $serializer,Request $request, PictureRepository $pictureRepository, UrlGeneratorInterface $urlGenerator): JsonResponse
+    public function getPicture(int $idPicture, SerializerInterface $serializer,Request $request, PictureRepository $pictureRepository, UrlGeneratorInterface $urlGenerator, TagAwareCacheInterface $cache): JsonResponse
     {
         $picture = $pictureRepository->find($idPicture);
         $relativePath = $picture->getPublicPath() . "/" . $picture->getRealPath();
         $location = $request->getUriForPath('/');
         $location = $location . str_replace("/assets", "assets", $relativePath);
-        if($picture){
-           return new JsonResponse($serializer->serialize($picture, 'json', ["groups" => 'getPicture']), JsonResponse::HTTP_OK, ["Location" => $location], true);
+
+        $idCache = 'getPicture';
+        $jsonPicture = $cache->get($idCache, function (ItemInterface $item) use ($picture, $serializer){
+            $item->tag("pictureCache");
+            if($picture){
+                return $serializer->serialize($picture, 'json', ["groups" => 'getPicture']);
+            }else{
+                return null;
+            }
+            //return $serializer->serialize($place, 'json',['groups' => 'getPlace']);
+        });
+        if($jsonPicture){
+           return new JsonResponse($jsonPicture, JsonResponse::HTTP_OK, ["Location" => $location], true);
         }
-        return new JsonResponse(null, JsonResponse::HTTP_NOT_FOUND);
-        
+        return new JsonResponse($jsonPicture, JsonResponse::HTTP_NOT_FOUND);
     }
 
     /**
@@ -53,9 +65,9 @@ class PictureController extends AbstractController
      */
     #[Route('api/pictures', name: 'pictures.create', methods:['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
-    public function createPicture(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator): JsonResponse
+    public function createPicture(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator, TagAwareCacheInterface $cache): JsonResponse
     {
-
+        $cache->invalidateTags(["pictureCache"]);
         $picture = new Picture();
         $picture->setPublicPath("/images/pictures");
         $picture->setStatus('ON');
