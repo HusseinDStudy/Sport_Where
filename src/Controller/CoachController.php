@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Coach;
 use App\Repository\CoachRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,7 +14,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\SerializerInterface;
+//use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface;
+use JMS\Serializer\Serializer;
+use JMS\Serializer\SerializationContext;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class CoachController extends AbstractController
 {
@@ -26,40 +32,91 @@ class CoachController extends AbstractController
         ]);
     }
 
+    /**
+     * Retourne la liste des coachs
+     *
+     * @param CoachRepository $repository
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
     #[Route('/api/coachs', name: 'coach.getAll', methods: ['GET'])]
-    public function getAllCoachs(CoachRepository $repository, SerializerInterface $serializer) : JsonResponse
+    #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
+    public function getAllCoachs(CoachRepository $repository, SerializerInterface $serializer, TagAwareCacheInterface $cache) : JsonResponse
     {
-        $coach = $repository->findAll();
-        $jsonCoachs = $serializer->serialize($coach, 'json',['groups' => 'getPlace']);
+        $idCache = 'getAllCoachs';
+        $jsonCoachs = $cache->get($idCache, function (ItemInterface $item) use ($repository, $serializer){
+            $coach = $repository->findAll();
+            $item->tag("coachCache");
+            $context = SerializationContext::create()->setGroups(['getPlace']);
+            return $serializer->serialize($coach, 'json',$context);
+        });
+
+        //$jsonCoachs = $serializer->serialize($coach, 'json',['groups' => 'getPlace']);
         return new JsonResponse($jsonCoachs, Response::HTTP_OK, [], true);
     }
 
+    /**
+     * Retourne un coach par son id
+     *
+     * @param Coach $coach
+     * @param CoachRepository $repository
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
     #[Route('/api/coachs/{idCoach}', name: 'coach.get', methods: ['GET'])]
+    #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     #[ParamConverter("coach", options:['id' => 'idCoach'], class: "App\Entity\Coach")]
     public function getCoach(
         Coach $coach,
         CoachRepository $repository,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        TagAwareCacheInterface $cache
     ) : JsonResponse
     {
-        $jsonPlaces = $serializer->serialize($coach, 'json',['groups' => 'getCoach']);
+        $idCache = 'getCoach';
+        $jsonPlaces = $cache->get($idCache, function (ItemInterface $item) use ($coach, $repository, $serializer){
+            $item->tag("coachCache");
+            $context = SerializationContext::create()->setGroups(['getCoach']);
+            return $serializer->serialize($coach, 'json',$context);
+        });
+        //$jsonPlaces = $serializer->serialize($coach, 'json',['groups' => 'getCoach']);
 
         return new JsonResponse($jsonPlaces, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
+    /**
+     * Supprime un coach par son id
+     *
+     * @param Coach $coach
+     * @param EntityManagerInterface $entityManager
+     * @return JsonResponse
+     */
     #[Route('/api/coachs/{idCoach}', name: 'coach.delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     #[ParamConverter("coach", options:['id' => 'idCoach'], class: "App\Entity\Coach")]
-    public function deleteCoach(Coach $coach, EntityManagerInterface $entityManager) : JsonResponse
+    public function deleteCoach(Coach $coach, EntityManagerInterface $entityManager, TagAwareCacheInterface $cache) : JsonResponse
     {
+        $cache->invalidateTags(["coachCache"]);
         $entityManager->remove($coach);
         $entityManager->flush();
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
+    /**
+     * Creer un coach
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param SerializerInterface $serializer
+     * @param CoachRepository $coachRepository
+     * @return JsonResponse
+     */
     #[Route('/api/coachs', name: 'coach.create', methods: ['POST'])]
-    public function createCoach(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository) : JsonResponse
+    #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
+    public function createCoach(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository, TagAwareCacheInterface $cache) : JsonResponse
     {
-
+        $cache->invalidateTags(["coachCache"]);
         $coach = $serializer->deserialize($request->getContent(), Coach::class, 'json');
         $coach->setStatu('ON');
 
@@ -67,13 +124,31 @@ class CoachController extends AbstractController
         $entityManager->flush();
 
         $location = $urlGenerator->generate('coach.get', ['idCoach' => $coach->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
-        $jsonPlace = $serializer->serialize($coach, "json", ['groups' => 'getCoach']);
+        $context = SerializationContext::create()->setGroups(['getCoach']);
+        $jsonPlace = $serializer->serialize($coach, "json", $context);
         return new JsonResponse($jsonPlace, JsonResponse::HTTP_CREATED, ['Location' => $location], true);
     }
 
+    /**
+     * Modifie un coach par son id
+     *
+     * @param Coach $coach
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param SerializerInterface $serializer
+     * @return void
+     */
     #[Route('/api/coachs/{id}', name: 'coach.update', methods: ['PUT'])]
-    public function updateCoach(Coach $coach, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer){
-        $coach = $serializer->deserialize($request->getContent(), Coach::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $coach]);
+    #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
+    public function updateCoach(Coach $coach, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, TagAwareCacheInterface $cache){
+        $cache->invalidateTags(["coachCache"]);
+        $coach = $serializer->deserialize($request->getContent(), Coach::class, 'json');//[AbstractNormalizer::OBJECT_TO_POPULATE => $coach]
+        $updatedCoach = $serializer->deserialize($request->getContent(), Coach::class, 'json');
+
+        $coach->setCoachFullName($updatedCoach->getCoachFullName() ? $updatedCoach->getCoachFullName() : $coach->getCoachFullName() );
+        $coach->setCoachPhoneNumber($updatedCoach->getCoachPhoneNumber() ? $updatedCoach->getCoachPhoneNumber() : $coach->getCoachPhoneNumber() );
+
         $coach->setStatu('ON');
         
         $location = $urlGenerator->generate('coach.get', ['idCoach' => $coach->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
