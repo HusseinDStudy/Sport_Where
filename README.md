@@ -2,4 +2,6 @@
 
 API permettant de localiser les lieux sportifs ( salles de sport, crossfit, parcs de street workout, etc ).
 
-
+Noel Thomas
+Tardy Guilhem
+Dajani Hussein
