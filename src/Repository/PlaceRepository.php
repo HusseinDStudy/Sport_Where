@@ -40,7 +40,7 @@ class PlaceRepository extends ServiceEntityRepository
     }
 
     /**
-     * Retourne les lieux paginés par $page a la limite $limit
+     * Retourne les lieux paginés par $page a la limite $limit et  ordonné de manière decroissante
      * @param int $page
      * @param int $limit de lieux par page
      * @return array
@@ -49,6 +49,7 @@ class PlaceRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('place');
         $qb->setMaxResults($limit);
         $qb->setFirstResult(($page - 1) * $limit);
+        $qb->orderBy('place.placeRate', 'DESC');
         return $qb->getQuery()->getResult();
     }
 
