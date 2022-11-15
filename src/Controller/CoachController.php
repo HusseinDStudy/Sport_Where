@@ -18,6 +18,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializationContext;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
@@ -118,12 +119,16 @@ class CoachController extends AbstractController
      */
     #[Route('/api/coachs', name: 'coach.create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
-    public function createCoach(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository, TagAwareCacheInterface $cache) : JsonResponse
+    public function createCoach(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository, TagAwareCacheInterface $cache, ValidatorInterface $validator) : JsonResponse
     {
         $cache->invalidateTags(["coachCache"]);
         $coach = $serializer->deserialize($request->getContent(), Coach::class, 'json');
         $coach->setStatus('ON');
 
+        $errors = $validator->validate($coach);
+        if ($errors->count() > 0){
+            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
         $entityManager->persist($coach);
         $entityManager->flush();
 
@@ -145,7 +150,7 @@ class CoachController extends AbstractController
      */
     #[Route('/api/coachs/{id}', name: 'coach.update', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
-    public function updateCoach(Coach $coach, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, TagAwareCacheInterface $cache){
+    public function updateCoach(Coach $coach, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, TagAwareCacheInterface $cache, ValidatorInterface $validator){
         $cache->invalidateTags(["coachCache"]);
         $coach = $serializer->deserialize($request->getContent(), Coach::class, 'json');//[AbstractNormalizer::OBJECT_TO_POPULATE => $coach]
         $updatedCoach = $serializer->deserialize($request->getContent(), Coach::class, 'json');
@@ -157,6 +162,10 @@ class CoachController extends AbstractController
         
         $location = $urlGenerator->generate('coach.get', ['idCoach' => $coach->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
+        $errors = $validator->validate($coach);
+        if ($errors->count() > 0){
+            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
         $entityManager->persist($coach);
         $entityManager->flush();
         $jsonCoachs = $serializer->serialize($coach, "json", ['getCoach']);
