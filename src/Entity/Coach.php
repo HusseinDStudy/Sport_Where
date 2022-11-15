@@ -39,17 +39,17 @@ class Coach
     #[Assert\NotBlank(message: "Un coach doit avoir un numéro de téléphone")]
     #[Assert\NotNull()]
     #[ORM\Column(length: 20, nullable: true)]
-    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    #[Groups(['getPlace','getCoach'])]
     private ?string $coachPhoneNumber = null;
 
     #[ORM\Column(length: 20)]
-    private ?string $statu = null;
+    private ?string $status = null;
 
     #[Assert\NotBlank(message: "Un coach doit avoir un nom")]
     #[Assert\NotNull()]
-    #[Assert\Length(min: 3, minMessage: "Le nom de la place doit faire plus de {{ limit }} caracteres")]
+    #[Assert\Length(min: 3, minMessage: "Le nom du coach doit faire plus de {{ limit }} caractères")]
     #[ORM\Column(length: 255)]
-    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    #[Groups(['getPlace','getCoach'])]
     private ?string $coachFullName = null;
 
     public function __construct()
@@ -104,14 +104,14 @@ class Coach
         return $this;
     }
 
-    public function getStatu(): ?string
+    public function getStatus(): ?string
     {
-        return $this->statu;
+        return $this->status;
     }
 
-    public function setStatu(string $statu): self
+    public function setStatus(string $status): self
     {
-        $this->statu = $statu;
+        $this->status = $status;
 
         return $this;
     }

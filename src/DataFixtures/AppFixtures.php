@@ -72,7 +72,7 @@ private $userPasswordHasher;
 
             $coach->setCoachPhoneNumber($this->faker->PhoneNumber());
             $coach->setCoachFullName($this->faker->Name());
-            $coach->setStatu("ON");
+            $coach->setStatus("ON");
 
             $manager->persist($coach);
             $manager->flush();
