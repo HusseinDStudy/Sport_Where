@@ -155,7 +155,8 @@ class CoachController extends AbstractController
 
         $entityManager->persist($coach);
         $entityManager->flush();
-        $jsonPlace = $serializer->serialize($coach, "json", ['getCoach']);
+        $context = SerializationContext::create()->setGroups(['getCoach']);
+        $jsonPlace = $serializer->serialize($coach, "json", $context);
         return new JsonResponse($jsonPlace, JsonResponse::HTTP_CREATED, ['Location' => $location], true);
     }
 }
