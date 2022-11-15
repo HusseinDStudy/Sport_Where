@@ -23,20 +23,13 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class CoachController extends AbstractController
 {
-    #[Route('/coach', name: 'app_coach')]
-    public function index(): JsonResponse
-    {
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/CoachController.php',
-        ]);
-    }
 
     /**
      * Retourne la liste des coachs
      *
      * @param CoachRepository $repository
      * @param SerializerInterface $serializer
+     * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
     #[Route('/api/coachs', name: 'coach.getAll', methods: ['GET'])]
@@ -47,7 +40,7 @@ class CoachController extends AbstractController
         $jsonCoachs = $cache->get($idCache, function (ItemInterface $item) use ($repository, $serializer){
             $coach = $repository->findAll();
             $item->tag("coachCache");
-            $context = SerializationContext::create()->setGroups(['getPlace']);
+            $context = SerializationContext::create()->setGroups(['getCoach']);
             return $serializer->serialize($coach, 'json',$context);
         });
 
@@ -61,6 +54,7 @@ class CoachController extends AbstractController
      * @param Coach $coach
      * @param CoachRepository $repository
      * @param SerializerInterface $serializer
+     * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
     #[Route('/api/coachs/{idCoach}', name: 'coach.get', methods: ['GET'])]
@@ -89,6 +83,7 @@ class CoachController extends AbstractController
      *
      * @param Coach $coach
      * @param EntityManagerInterface $entityManager
+     * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
     #[Route('/api/coachs/{idCoach}', name: 'coach.delete', methods: ['DELETE'])]
@@ -109,12 +104,12 @@ class CoachController extends AbstractController
      * @param EntityManagerInterface $entityManager
      * @param UrlGeneratorInterface $urlGenerator
      * @param SerializerInterface $serializer
-     * @param CoachRepository $coachRepository
+     * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
     #[Route('/api/coachs', name: 'coach.create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
-    public function createCoach(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository, TagAwareCacheInterface $cache) : JsonResponse
+    public function createCoach(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, TagAwareCacheInterface $cache) : JsonResponse
     {
         $cache->invalidateTags(["coachCache"]);
         $coach = $serializer->deserialize($request->getContent(), Coach::class, 'json');
@@ -137,11 +132,12 @@ class CoachController extends AbstractController
      * @param EntityManagerInterface $entityManager
      * @param UrlGeneratorInterface $urlGenerator
      * @param SerializerInterface $serializer
+     * @param TagAwareCacheInterface $cache
      * @return void
      */
     #[Route('/api/coachs/{id}', name: 'coach.update', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
-    public function updateCoach(Coach $coach, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, TagAwareCacheInterface $cache){
+    public function updateCoach(Coach $coach, Request $request, EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, TagAwareCacheInterface $cache){
         $cache->invalidateTags(["coachCache"]);
         $coach = $serializer->deserialize($request->getContent(), Coach::class, 'json');//[AbstractNormalizer::OBJECT_TO_POPULATE => $coach]
         $updatedCoach = $serializer->deserialize($request->getContent(), Coach::class, 'json');
