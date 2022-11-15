@@ -31,6 +31,8 @@ security:
             jwt: ~
             refresh_jwt:
                 check_path: /api/token/refresh # or, you may use the `api_refresh_token` route name
+            logout:
+                path: api_token_invalidate
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
