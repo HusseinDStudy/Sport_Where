@@ -19,6 +19,7 @@ use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializationContext;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use OpenApi\Attributes as OA;
 
 class PictureController extends AbstractController
 {
@@ -32,6 +33,9 @@ class PictureController extends AbstractController
      * @param UrlGeneratorInterface $urlGenerator
      * @return JsonResponse
      */
+    #[OA\Tag(name: 'Picture')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
     #[Route('api/pictures/{idPicture}', name: 'picture.get', methods:['GET'])]
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function getPicture(int $idPicture, SerializerInterface $serializer,Request $request, PictureRepository $pictureRepository, UrlGeneratorInterface $urlGenerator, TagAwareCacheInterface $cache): JsonResponse
@@ -67,6 +71,9 @@ class PictureController extends AbstractController
      * @param UrlGeneratorInterface $urlGenerator
      * @return JsonResponse
      */
+    #[OA\Tag(name: 'Picture')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
     #[Route('api/pictures', name: 'pictures.create', methods:['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function createPicture(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator, TagAwareCacheInterface $cache): JsonResponse
