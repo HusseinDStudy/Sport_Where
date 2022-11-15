@@ -39,38 +39,12 @@ class PlaceRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return Place[] Returns an array of Place objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Place
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
-
-/**
- * Retourne les lieux paginés par $page a la limite $limit
- * @param int $page
- * @param int $limit de lieux par page
- * @return array
- */
-
+    /**
+     * Retourne les lieux paginés par $page a la limite $limit
+     * @param int $page
+     * @param int $limit de lieux par page
+     * @return array
+     */
     public function findWithPagination($page, $limit){
         $qb = $this->createQueryBuilder('place');
         $qb->setMaxResults($limit);
@@ -79,16 +53,18 @@ class PlaceRepository extends ServiceEntityRepository
     }
 
     /**
- * Retourne les lieux actif paginés par $page a la limite $limit ordonné de manière decroissante
+ * Retourne les lieux actif paginés par $page a la limite $limit ordonné de manière decroissante et filtré par departement $dept
  * @param int $page
  * @param int $limit de lieux par page
+ * @param string $dept filtre de departement
  * @return array
  */
-    public function findAllCustom($page, $limit){
+    public function findAllCustom($page, $limit, $dept){
         $qb = $this->createQueryBuilder('place');
         $qb->setMaxResults($limit);
         $qb->setFirstResult(($page - 1) * $limit);
         $qb->where('place.status = \'on\'');
+        $qb->andWhere('place.dept = :dept')->setParameter('dept', $dept);
         $qb->orderBy('place.placeRate', 'DESC');
         return $qb->getQuery()->getResult();
     }
@@ -114,4 +90,10 @@ class PlaceRepository extends ServiceEntityRepository
      * @param int $departement
      * @return array
      */
+    public function getPlacesbyDept(string $dept){
+        $qb = $this->createQueryBuilder('place')
+            ->where('place.dept = :dept')
+            ->setParameter('dept', $dept);
+        return $qb->getQuery()->getResult();
+    }
 }

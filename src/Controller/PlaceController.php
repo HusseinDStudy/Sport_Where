@@ -27,37 +27,82 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class PlaceController extends AbstractController
 {
-    #[Route('/place', name: 'app_place')]
-    public function index(): JsonResponse
-    {
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/PlaceController.php',
-        ]);
-    }
 
-        /**
+    /**
      * Retourne la liste des lieux paginés
      *
      * @param PlaceRepository $repository
      * @param SerializerInterface $serializer
      * @param Request $request
+     * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
     #[Route('/api/places', name: 'places.getAll', methods: ['GET'])]
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function getAllPlaces(PlaceRepository $repository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache) : JsonResponse
     {
-        $idCache = 'getAllPlaces';
-        $jsonPlaces = $cache->get($idCache, function (ItemInterface $item) use ($request, $serializer, $repository){
-            $item->tag("placeCache");
-            $page = $request->get('page', 1);
-            $limit = $request->get('limit', 5);
-            $places = $repository->findAllCustom($page, $limit);
-            $context = SerializationContext::create()->setGroups(['getPlace']);
-            return $serializer->serialize($places, 'json', $context);
-        });
-        //$jsonPlaces = $serializer->serialize($places, 'json',['groups' => 'getPlace']);
+
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 5);
+        $context = SerializationContext::create()->setGroups(['getPlace']);
+        if($page==1 and $limit==5){
+            $idCache = 'getAllPlaces';
+            $jsonPlaces = $cache->get($idCache, function (ItemInterface $item) use ($context, $limit, $page, $request, $serializer, $repository){
+                $item->tag("placeCache");
+                $places = $repository->findWithPagination($page, $limit);
+                return $serializer->serialize($places, 'json', $context);
+            });
+        }else{
+            $places = $repository->findWithPagination($page, $limit);
+            $jsonPlaces=$serializer->serialize($places, 'json', $context);
+        }
+        return new JsonResponse($jsonPlaces, Response::HTTP_OK, ['accept' => 'json'], true);
+    }
+
+    /**
+     * Retourne la liste des lieux d'un departement demandés et paginés
+     *
+     * @param PlaceRepository $repository
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @param TagAwareCacheInterface $cache
+     * @return JsonResponse
+     */
+    #[Route('/api/placesDept', name: 'places.getAllByDept', methods: ['GET'])]
+    #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
+    public function getPlacesbyDept(PlaceRepository $repository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache) : JsonResponse
+    {
+        //$status = $request->get('status', 'ON');
+
+        //$places = $repository->findWithPagination($page, $limit);
+        //$places = $repository->orderByRate();
+        //$places = $repository->findPlacesByStatus($status);
+        //$places = $repository->findAllCustom($page, $limit);
+
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 5);
+        $dept= $request->get('dept',0);
+
+        if($dept == 0){
+            $data=['message'=>'votre  $dept n\'est pad valide'];
+            $jsonPlaces = $serializer->serialize($data, 'json');
+            return new JsonResponse($jsonPlaces, Response::HTTP_UNPROCESSABLE_ENTITY, ['accept' => 'json'], true);
+        }
+
+        $context = SerializationContext::create()->setGroups(['getPlace']);
+        if($page==1 and $limit==5 and $dept==0){
+            $idCache = 'getAllPlaces';
+            $jsonPlaces = $cache->get($idCache, function (ItemInterface $item) use ($context, $dept, $limit, $page, $request, $serializer, $repository){
+                $item->tag("placeCache");
+                $places = $repository->findAllCustom($page, $limit,$dept);
+                return $serializer->serialize($places, 'json', $context);
+            });
+        }else{
+            $places = $repository->findAllCustom($page, $limit,$dept);
+            $jsonPlaces=$serializer->serialize($places, 'json', $context);
+        }
+
+
         return new JsonResponse($jsonPlaces, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
@@ -67,6 +112,7 @@ class PlaceController extends AbstractController
      * @param Place $place
      * @param PlaceRepository $repository
      * @param SerializerInterface $serializer
+     * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
     #[Route('/api/places/{idPlace}', name: 'places.get', methods: ['GET'])]
@@ -90,6 +136,7 @@ class PlaceController extends AbstractController
      * @param Place $place
      * @param EntityManagerInterface $entityManager
      * @param SerializerInterface $serializer
+     * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
     #[Route('/api/places/{idPlace}', name: 'places.delete', methods: ['DELETE'])]
@@ -147,26 +194,25 @@ class PlaceController extends AbstractController
      * @param EntityManagerInterface $entityManager
      * @param UrlGeneratorInterface $urlGenerator
      * @param SerializerInterface $serializer
-     * @param CoachRepository $CoachRepository
      * @param ValidatorInterface $validator
+     * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
     #[Route('/api/places/{id}', name: 'places.update', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
-    public function updatePlace(Place $place, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $CoachRepository, ValidatorInterface $validator, TagAwareCacheInterface $cache) : JsonResponse
+    public function updatePlace(Place $place, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, ValidatorInterface $validator, TagAwareCacheInterface $cache) : JsonResponse
     {
         $cache->invalidateTags(["placeCache"]);
-        //$place = $serializer->deserialize($request->getContent(), Place::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $place]);
         $updatedPlace = $serializer->deserialize($request->getContent(), Place::class, 'json');
 
         $place->setPlaceName($updatedPlace->getPlaceName() ? $updatedPlace->getPlaceName() : $place->getPlaceName() );
         $place->setPlaceAddress($updatedPlace->getPlaceAddress() ? $updatedPlace->getPlaceAddress() : $place->getPlaceAddress() );
         $place->setPlaceCity($updatedPlace->getPlaceCity() ? $updatedPlace->getPlaceCity() : $place->getPlaceCity() );
         $place->setPlaceType($updatedPlace->getPlaceType() ? $updatedPlace->getPlaceType() : $place->getPlaceType() );
-        $place->setPlaceRate($updatedPlace->getPlaceRate() ? $updatedPlace->getPlaceRate() : $place->getPlaceRate() );
+        //$place->setPlaceRate($updatedPlace->getPlaceRate() ? $updatedPlace->getPlaceRate() : $place->getPlaceRate() );
         $place->setCoach($updatedPlace->getCoach() ? $updatedPlace->getCoach() : $place->getCoach() );
-        $place->setPlaceRate($updatedPlace->getPlaceRate() ? $updatedPlace->getPlaceRate() : $place->getPlaceRate() );
         $place->setDept($updatedPlace->getDept() ? $updatedPlace->getDept() : $place->getDept() );
+        $place->addRatePlace($updatedPlace->getRatePlaces() ? $updatedPlace->getRatePlaces() : $place->getRatePlaces() );
         $place->setStatus('ON');
 
         $location = $urlGenerator->generate('places.get', ['idPlace' => $place->getId()], UrlGeneratorInterface::ABSOLUTE_URL);

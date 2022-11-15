@@ -39,7 +39,7 @@ class Coach
     #[Assert\NotBlank(message: "Un coach doit avoir un numéro de téléphone")]
     #[Assert\NotNull()]
     #[ORM\Column(length: 20, nullable: true)]
-    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    #[Groups(['getPlace','getCoach'])]
     private ?string $coachPhoneNumber = null;
 
     #[ORM\Column(length: 20)]
@@ -49,7 +49,7 @@ class Coach
     #[Assert\NotNull()]
     #[Assert\Length(min: 3, minMessage: "Le nom du coach doit faire plus de {{ limit }} caractères")]
     #[ORM\Column(length: 255)]
-    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    #[Groups(['getPlace','getCoach'])]
     private ?string $coachFullName = null;
 
     public function __construct()
