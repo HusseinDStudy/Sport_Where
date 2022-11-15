@@ -48,13 +48,6 @@ class PlaceController extends AbstractController
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function getAllPlaces(PlaceRepository $repository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache) : JsonResponse
     {
-        //$status = $request->get('status', 'ON');
-
-        //$places = $repository->findWithPagination($page, $limit);
-        //$places = $repository->orderByRate();
-        //$places = $repository->findPlacesByStatus($status);
-        //$places = $repository->findAllCustom($page, $limit);
-
         $idCache = 'getAllPlaces';
         $jsonPlaces = $cache->get($idCache, function (ItemInterface $item) use ($request, $serializer, $repository){
             $item->tag("placeCache");
