@@ -43,7 +43,7 @@ class Coach
     private ?string $coachPhoneNumber = null;
 
     #[ORM\Column(length: 20)]
-    private ?string $statu = null;
+    private ?string $status = null;
 
     #[Assert\NotBlank(message: "Un coach doit avoir un nom")]
     #[Assert\NotNull()]
@@ -104,14 +104,14 @@ class Coach
         return $this;
     }
 
-    public function getStatu(): ?string
+    public function getStatus(): ?string
     {
-        return $this->statu;
+        return $this->status;
     }
 
-    public function setStatu(string $statu): self
+    public function setStatus(string $status): self
     {
-        $this->statu = $statu;
+        $this->status = $status;
 
         return $this;
     }
