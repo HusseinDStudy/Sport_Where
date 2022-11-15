@@ -36,35 +36,35 @@ class Place
     #[Assert\NotNull()]
     #[Assert\Length(min: 3, minMessage: "Le nom de la place doit faire plus de {{ limit }} caracteres")]
     #[ORM\Column(length: 255)]
-    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    #[Groups(['getPlace', 'getCoach'])]
     private ?string $placeName = null;
 
     #[Assert\NotBlank(message: "Une place doit avoir une addresse")]
     #[Assert\NotNull()]
     #[ORM\Column(length: 255)]
-    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    #[Groups(['getPlace', 'getCoach'])]
     private ?string $placeAddress = null;
 
     #[Assert\NotBlank(message: "Une place doit avoir une ville")]
     #[Assert\NotNull()]
     #[ORM\Column(length: 255)]
-    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    #[Groups(['getPlace', 'getCoach'])]
     private ?string $placeCity = null;
 
     #[Assert\NotBlank(message: "Une place doit avoir un departement")]
     #[Assert\NotNull()]
     #[ORM\Column]
-    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    #[Groups(['getPlace', 'getCoach'])]
     private ?int $dept = null;
 
     #[Assert\NotBlank(message: "Une place doit avoir un type")]
     #[Assert\NotNull()]
     #[ORM\Column(length: 255)]
-    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    #[Groups(['getPlace', 'getCoach'])]
     private ?string $placeType = null;
 
      #[ORM\Column(nullable: true)]
-     #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+     #[Groups(['getPlace', 'getCoach'])]
      private ?int $placeRate = null;
 
     #[Assert\NotBlank(message: "Une place doit avoir un statut")]
@@ -74,7 +74,7 @@ class Place
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'coachName')]
-    #[Groups(['getPlace', 'getAllPlace','getCoach','getAllCoach'])]
+    #[Groups(['getPlace', 'getCoach'])]
     private ?Coach $coach = null;
 
     #[ORM\OneToMany(mappedBy: 'idPlace', targetEntity: RatePlaces::class)]
