@@ -24,6 +24,11 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use OpenApi\Attributes as OA;
+use phpDocumentor\Reflection\DocBlock\Tags\Formatter;
+use PhpParser\Node\Expr\Cast\String_;
+
+use function PHPSTORM_META\type;
 
 class PlaceController extends AbstractController
 {
@@ -37,6 +42,11 @@ class PlaceController extends AbstractController
      * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
+    #[OA\Tag(name: 'Place')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
+    #[OA\Parameter(name: 'page', example: '1', in: 'query')]
+    #[OA\Parameter(name: 'limit', example: '5', in: 'query')]
     #[Route('/api/places', name: 'places.getAll', methods: ['GET'])]
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function getAllPlaces(PlaceRepository $repository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache) : JsonResponse
@@ -68,6 +78,13 @@ class PlaceController extends AbstractController
      * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
+    #[OA\Tag(name: 'Place')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
+    #[OA\Response(response: '422', description: 'Unprocessable Content')]
+    #[OA\Parameter(name: 'page', example: '1', in: 'query')]
+    #[OA\Parameter(name: 'limit', example: '5', in: 'query')]
+    #[OA\Parameter(name: 'dept', example: '69', in: 'query')]
     #[Route('/api/placesDept', name: 'places.getAllByDept', methods: ['GET'])]
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function getPlacesbyDept(PlaceRepository $repository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache) : JsonResponse
@@ -115,6 +132,9 @@ class PlaceController extends AbstractController
      * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
+    #[OA\Tag(name: 'Place')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
     #[Route('/api/places/{idPlace}', name: 'places.get', methods: ['GET'])]
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     #[ParamConverter("place", options:['id' => 'idPlace'], class: "App\Entity\Place")]
@@ -139,6 +159,9 @@ class PlaceController extends AbstractController
      * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
+    #[OA\Tag(name: 'Place')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
     #[Route('/api/places/{idPlace}', name: 'places.delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     #[ParamConverter("place", options:['id' => 'idPlace'], class: "App\Entity\Place")]
@@ -161,6 +184,9 @@ class PlaceController extends AbstractController
      * @param ValidatorInterface $validator
      * @return JsonResponse
      */
+    #[OA\Tag(name: 'Place')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
     #[Route('/api/places', name: 'places.create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function createPlace(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository, ValidatorInterface $validator, TagAwareCacheInterface $cache) : JsonResponse
@@ -198,6 +224,9 @@ class PlaceController extends AbstractController
      * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
+    #[OA\Tag(name: 'Place')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
     #[Route('/api/places/{id}', name: 'places.update', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function updatePlace(Place $place, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, ValidatorInterface $validator, TagAwareCacheInterface $cache) : JsonResponse
