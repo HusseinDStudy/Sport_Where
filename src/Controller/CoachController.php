@@ -21,6 +21,7 @@ use JMS\Serializer\SerializationContext;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use OpenApi\Attributes as OA;
 
 class CoachController extends AbstractController
 {
@@ -33,6 +34,10 @@ class CoachController extends AbstractController
      * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
+
+    #[OA\Tag(name: 'Coach')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
     #[Route('/api/coachs', name: 'coach.getAll', methods: ['GET'])]
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function getAllCoachs(
@@ -62,6 +67,9 @@ class CoachController extends AbstractController
      * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
+    #[OA\Tag(name: 'Coach')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
     #[Route('/api/coachs/{idCoach}', name: 'coach.get', methods: ['GET'])]
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     #[ParamConverter("coach", options:['id' => 'idCoach'], class: "App\Entity\Coach")]
@@ -91,6 +99,9 @@ class CoachController extends AbstractController
      * @param TagAwareCacheInterface $cache
      * @return JsonResponse
      */
+    #[OA\Tag(name: 'Coach')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
     #[Route('/api/coachs/{idCoach}', name: 'coach.delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     #[ParamConverter("coach", options:['id' => 'idCoach'], class: "App\Entity\Coach")]
@@ -113,6 +124,9 @@ class CoachController extends AbstractController
      * @param ValidatorInterface $validator
      * @return JsonResponse
      */
+    #[OA\Tag(name: 'Coach')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
     #[Route('/api/coachs', name: 'coach.create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function createCoach(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, TagAwareCacheInterface $cache, ValidatorInterface $validator) : JsonResponse
@@ -146,6 +160,9 @@ class CoachController extends AbstractController
      * @param ValidatorInterface $validator
      * @return void
      */
+    #[OA\Tag(name: 'Coach')]
+    #[OA\Response(response: '200', description: 'OK')]
+    #[OA\Response(response: '401', description: 'Unauthorized')]
     #[Route('/api/coachs/{id}', name: 'coach.update', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function updateCoach(Coach $coach, Request $request, EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, TagAwareCacheInterface $cache,ValidatorInterface $validator){
