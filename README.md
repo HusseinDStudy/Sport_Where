@@ -31,3 +31,6 @@ Tardy Guilhem -> GuilhemTrd
 
 Dajani Hussein -> HusseinDStudy 
 
+
+
+Urgence le commit Hateoas for all casse les methodes POST PUT DELETE  pour COACH ET PLACE (post place)
