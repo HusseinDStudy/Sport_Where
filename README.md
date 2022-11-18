@@ -25,7 +25,7 @@ Puis démarrer le server Symfony avec "symfony serve"
 
 
 # 💻 Groupe de travail
-Noel Thomas / JLwear
-Tardy Guilhem / GuilhemTrd
-Dajani Hussein / HusseinDStudy
+Noel Thomas -> JLwear /
+Tardy Guilhem -> GuilhemTrd /
+Dajani Hussein -> HusseinDStudy /
 
