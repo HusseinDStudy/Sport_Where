@@ -27,7 +27,8 @@ Pousser la base de données en local avec de fausses données avec appFixtures.
 
 Puis démarrer le server Symfony avec "symfony serve"
 
-Compte Admin : ``` json {
+Compte Admin : ``` json 
+{
 
 "username": "admin",
 
