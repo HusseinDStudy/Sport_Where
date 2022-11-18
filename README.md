@@ -27,6 +27,12 @@ Pousser la base de données en local avec de fausses données avec appFixtures.
 
 Puis démarrer le server Symfony avec "symfony serve"
 
+Compte Admin : login -> admin
+               mdp -> password
+               
+Compte User : login -> user
+               mdp -> password
+
 
 # 💻 Groupe de travail
 Noel Thomas -> JLWear 
