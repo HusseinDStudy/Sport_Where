@@ -29,7 +29,7 @@ Puis démarrer le server Symfony avec "symfony serve"
 
 
 # 💻 Groupe de travail
-Noel Thomas -> JLwear 
+Noel Thomas -> JLWear 
 
 Tardy Guilhem -> GuilhemTrd 
 
