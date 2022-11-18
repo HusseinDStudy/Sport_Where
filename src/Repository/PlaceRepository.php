@@ -49,17 +49,18 @@ class PlaceRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('place');
         $qb->setMaxResults($limit);
         $qb->setFirstResult(($page - 1) * $limit);
+        $qb->where('place.status = \'on\'');//TODO: A Verifier avec status OFF
         $qb->orderBy('place.placeRate', 'DESC');
         return $qb->getQuery()->getResult();
     }
 
     /**
- * Retourne les lieux actif paginés par $page a la limite $limit ordonné de manière decroissante et filtré par departement $dept
- * @param int $page
- * @param int $limit de lieux par page
- * @param string $dept filtre de departement
- * @return array
- */
+     * Retourne les lieux actif paginés par $page a la limite $limit ordonné de manière decroissante et filtré par departement $dept
+     * @param int $page
+     * @param int $limit de lieux par page
+     * @param string $dept filtre de departement
+     * @return array
+     */
     public function findAllCustom($page, $limit, $dept){
         $qb = $this->createQueryBuilder('place');
         $qb->setMaxResults($limit);
@@ -80,11 +81,6 @@ class PlaceRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    // public function findPlacesByStatus($status){
-    //     $qb = $this->createQueryBuilder('place')
-    //     ->andwhere('place.status = :status')->setParameter('status', $status);
-    //     return $qb->getQuery()->getResult();
-    // }
 
     /**
      * Retourne les lieux sportif selon son département
