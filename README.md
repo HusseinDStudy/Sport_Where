@@ -1,3 +1,7 @@
+# ⚠ Urgent
+
+Toutes les méthodes marche sur POSTMAN avec la nomenclature snake case par contre sur l'api doc problème de nomenclature (modèle en kamel à la place de snake case) sur les méthode POST et PUT.
+
 # 💪 Sport'Where
 
 API permettant de localiser les lieux sportifs ( salles de sport, crossfit, parcs de street workout, etc ).
@@ -31,6 +35,3 @@ Tardy Guilhem -> GuilhemTrd
 
 Dajani Hussein -> HusseinDStudy 
 
-
-
-Toutes les méthodes marche sur POSTMAN avec la nomenclature snake case par contre sur l'api doc problème de nomenclature (modèle en kamel à la place de snake case) sur les méthode POST et PUT.
