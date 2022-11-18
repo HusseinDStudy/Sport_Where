@@ -81,7 +81,12 @@ Compte User [Format]:
 
 ## URL manquant sur l'API doc
 http://127.0.0.1:8000/api/token/invalidate
+```json
+{
+  "refresh_token": "string"
+}
 
+```
 # 💻 Groupe de travail
 
 Noel Thomas -> JLWear
