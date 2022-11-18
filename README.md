@@ -53,7 +53,7 @@ Compte User [Format]:
 
 ## La Bonne Nomenclature pour les BodyRequest:
 
-#### Post/Put Coach
+#### Post/Put Coach
 
 ```json
 {
