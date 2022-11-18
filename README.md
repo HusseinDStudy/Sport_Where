@@ -25,7 +25,7 @@ Pousser la base de données en local avec de fausses données avec appFixtures.
 
 Puis démarrer le server Symfony avec "symfony serve"
 
-⚠Rappel: La nomoclature des retour doit aussi etre en snake_case
+⚠Rappel: La nomenclature des retours doit aussi etre en snake_case
 
 ## Url de documentation
 
