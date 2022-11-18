@@ -11,24 +11,18 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\HttpFoundation\Request;
-//use Symfony\Component\Serializer\SerializerInterface;
 use JMS\Serializer\SerializerInterface;
-use JMS\Serializer\Serializer;
+use JMS\Serializer\Serializer;//TODO: remove and test
 use JMS\Serializer\SerializationContext;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mime\Message;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use OpenApi\Attributes as OA;
-use phpDocumentor\Reflection\DocBlock\Tags\Formatter;
-use PhpParser\Node\Expr\Cast\String_;
+use Nelmio\ApiDocBundle\Annotation\Model;
 
-use function PHPSTORM_META\type;
 
 class PlaceController extends AbstractController
 {
@@ -43,15 +37,14 @@ class PlaceController extends AbstractController
      * @return JsonResponse
      */
     #[OA\Tag(name: 'Place')]
-    #[OA\Response(response: '200', description: 'OK')]
-    #[OA\Response(response: '401', description: 'Unauthorized')]
-    #[OA\Parameter(name: 'page', example: '1', in: 'query')]
-    #[OA\Parameter(name: 'limit', example: '5', in: 'query')]
+    #[OA\Response(response: '200', description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: Place::class, groups: ["getPlace"]))))]
+    #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
+    #[OA\Parameter(name: 'page', in: 'query', example: '1')]
+    #[OA\Parameter(name: 'limit', in: 'query', example: '5')]
     #[Route('/api/places', name: 'places.getAll', methods: ['GET'])]
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function getAllPlaces(PlaceRepository $repository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache) : JsonResponse
     {
-
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 5);
         $context = SerializationContext::create()->setGroups(['getPlace']);
@@ -79,12 +72,12 @@ class PlaceController extends AbstractController
      * @return JsonResponse
      */
     #[OA\Tag(name: 'Place')]
-    #[OA\Response(response: '200', description: 'OK')]
-    #[OA\Response(response: '401', description: 'Unauthorized')]
-    #[OA\Response(response: '422', description: 'Unprocessable Content')]
-    #[OA\Parameter(name: 'page', example: '1', in: 'query')]
-    #[OA\Parameter(name: 'limit', example: '5', in: 'query')]
-    #[OA\Parameter(name: 'dept', example: '69', in: 'query')]
+    #[OA\Response(response: '200', description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: Place::class, groups: ["getPlace"]))))]
+    #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
+    #[OA\Response(response: '422', description: 'Unprocessable Content', content: new OA\JsonContent(example: ['message'=>'votre  $dept n\'est pad valide']))]
+    #[OA\Parameter(name: 'page', in: 'query', example: '1')]
+    #[OA\Parameter(name: 'limit', in: 'query', example: '5')]
+    #[OA\Parameter(name: 'dept', in: 'query', example: '69')]
     #[Route('/api/placesDept', name: 'places.getAllByDept', methods: ['GET'])]
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function getPlacesbyDept(PlaceRepository $repository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache) : JsonResponse
@@ -133,11 +126,11 @@ class PlaceController extends AbstractController
      * @return JsonResponse
      */
     #[OA\Tag(name: 'Place')]
-    #[OA\Response(response: '200', description: 'OK')]
-    #[OA\Response(response: '401', description: 'Unauthorized')]
+    #[OA\Response(response: '200', description: 'OK', content: new Model(type: Place::class, groups: ["getPlace"]))]
+    #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[Route('/api/places/{idPlace}', name: 'places.get', methods: ['GET'])]
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
-    #[ParamConverter("place", options:['id' => 'idPlace'], class: "App\Entity\Place")]
+    #[ParamConverter("place", class: "App\Entity\Place", options: ['id' => 'idPlace'])]
     public function getPlace(Place $place, PlaceRepository $repository, SerializerInterface $serializer, TagAwareCacheInterface $cache) : JsonResponse
     {
         $idCache = 'getPlace';
@@ -146,7 +139,6 @@ class PlaceController extends AbstractController
             $context = SerializationContext::create()->setGroups(['getPlace']);
             return $serializer->serialize($place, 'json', $context);
         });
-        //$jsonPlaces = $serializer->serialize($place, 'json',['groups' => 'getPlace']);
         return new JsonResponse($jsonPlaces, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
@@ -160,17 +152,18 @@ class PlaceController extends AbstractController
      * @return JsonResponse
      */
     #[OA\Tag(name: 'Place')]
-    #[OA\Response(response: '200', description: 'OK')]
-    #[OA\Response(response: '401', description: 'Unauthorized')]
+    #[OA\Response(response: '204', description: 'NO CONTENT', content: null)]
+    #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[Route('/api/places/{idPlace}', name: 'places.delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
-    #[ParamConverter("place", options:['id' => 'idPlace'], class: "App\Entity\Place")]
+    #[ParamConverter("place", class: "App\Entity\Place", options: ['id' => 'idPlace'])]
     public function deletePlace(Place $place, EntityManagerInterface $entityManager, SerializerInterface $serializer, TagAwareCacheInterface $cache) : JsonResponse
     {
         $cache->invalidateTags(["placeCache"]);
+        $place->setCoach(null);
         $entityManager->remove($place);
         $entityManager->flush();
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
     /**
@@ -185,8 +178,9 @@ class PlaceController extends AbstractController
      * @return JsonResponse
      */
     #[OA\Tag(name: 'Place')]
-    #[OA\Response(response: '200', description: 'OK')]
-    #[OA\Response(response: '401', description: 'Unauthorized')]
+    #[OA\RequestBody(required: true, content: new Model( type: Place::class, groups: ["createUpdatePlace"]))]
+    #[OA\Response(response: '200', description: 'OK', content: new Model(type: Place::class, groups: ["getPlace"]))]
+    #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[Route('/api/places', name: 'places.create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function createPlace(Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, CoachRepository $coachRepository, ValidatorInterface $validator, TagAwareCacheInterface $cache) : JsonResponse
@@ -194,14 +188,12 @@ class PlaceController extends AbstractController
         $cache->invalidateTags(["placeCache"]);
         $place = $serializer->deserialize($request->getContent(), Place::class, 'json');
         $place->setStatus('ON');
-
         $content = $request->toArray();
         $idCoach = $content["idCoach"];
         $place->setCoach($coachRepository->find($idCoach));
-
         $errors = $validator->validate($place);
         if ($errors->count() > 0){
-            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+            return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
         $entityManager->persist($place);
         $entityManager->flush();
@@ -209,7 +201,7 @@ class PlaceController extends AbstractController
         $location = $urlGenerator->generate('places.get', ['idPlace' => $place->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
         $context = SerializationContext::create()->setGroups(['getPlace']);
         $jsonPlace = $serializer->serialize($place, "json", $context);
-        return new JsonResponse($jsonPlace, JsonResponse::HTTP_CREATED, ['Location' => $location], true);
+        return new JsonResponse($jsonPlace, Response::HTTP_CREATED, ['Location' => $location], true);
     }
 
     /**
@@ -225,8 +217,9 @@ class PlaceController extends AbstractController
      * @return JsonResponse
      */
     #[OA\Tag(name: 'Place')]
-    #[OA\Response(response: '200', description: 'OK')]
-    #[OA\Response(response: '401', description: 'Unauthorized')]
+    #[OA\RequestBody(required: true, content: new Model(type: Place::class, groups: ["createUpdatePlace"]))]
+    #[OA\Response(response: '200', description: 'OK', content: new Model(type: Place::class, groups: ["getPlace"]))]
+    #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[Route('/api/places/{id}', name: 'places.update', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
     public function updatePlace(Place $place, Request $request, EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, ValidatorInterface $validator, TagAwareCacheInterface $cache) : JsonResponse
@@ -238,23 +231,22 @@ class PlaceController extends AbstractController
         $place->setPlaceAddress($updatedPlace->getPlaceAddress() ? $updatedPlace->getPlaceAddress() : $place->getPlaceAddress() );
         $place->setPlaceCity($updatedPlace->getPlaceCity() ? $updatedPlace->getPlaceCity() : $place->getPlaceCity() );
         $place->setPlaceType($updatedPlace->getPlaceType() ? $updatedPlace->getPlaceType() : $place->getPlaceType() );
-        //$place->setPlaceRate($updatedPlace->getPlaceRate() ? $updatedPlace->getPlaceRate() : $place->getPlaceRate() );
+        $place->setPlaceRate($updatedPlace->getPlaceRate() ? $updatedPlace->getPlaceRate() : $place->getPlaceRate() );
         $place->setCoach($updatedPlace->getCoach() ? $updatedPlace->getCoach() : $place->getCoach() );
         $place->setDept($updatedPlace->getDept() ? $updatedPlace->getDept() : $place->getDept() );
-        $place->addRatePlace($updatedPlace->getRatePlaces() ? $updatedPlace->getRatePlaces() : $place->getRatePlaces() );
         $place->setStatus('ON');
 
         $location = $urlGenerator->generate('places.get', ['idPlace' => $place->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $errors = $validator->validate($place);
         if ($errors->count() > 0){
-            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+            return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
 
         $entityManager->persist($place);
         $entityManager->flush();
         $context = SerializationContext::create()->setGroups(['getPlace']);
         $jsonPlace = $serializer->serialize($place, "json", $context);
-        return new JsonResponse($jsonPlace, JsonResponse::HTTP_CREATED, ['Location' => $location], true);
+        return new JsonResponse($jsonPlace, Response::HTTP_CREATED, ['Location' => $location], true);
     }
 }

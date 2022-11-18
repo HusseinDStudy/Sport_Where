@@ -4,7 +4,6 @@ namespace App\DataFixtures;
 
 use App\Entity\Coach;
 use App\Entity\Place;
-use App\Entity\RatePlaces;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -45,17 +44,13 @@ private $userPasswordHasher;
             $manager->persist($userUser);
         }
 
-        //Authneticated Users
+        //Authneticated Admins
         $adminUser = new User();
         $password = "password";
         $adminUser->setUsername('admin')
         ->setRoles(["ROLE_ADMIN"])
         ->setPassword($this->userPasswordHasher->hashPassword($adminUser, $password));
         $manager->persist($adminUser);
-    
-
-        // $product = new Product();
-        // $manager->persist($product);
 
         for ($i=0; $i < 20 ; $i++) {
             $place = New Place();
@@ -64,7 +59,7 @@ private $userPasswordHasher;
             $place->setPlaceAddress($this->faker->streetAddress());
             $place->setPlaceCity($this->faker->randomElements(["Lyon","Paris","Marseille","Bordeaux","Brest","Strasbourg","Dijon","Nice","Nantes","Clermont-Ferrand","Toulon","Toulouse"])[0]);
             $place->setPlaceType($this->faker->randomElements(["Salle de musculation","Parc de street workout","Salle de crossfit"])[0]);
-            //$place->setPlaceRate($this->faker->numberBetween(0, 5 ));
+            $place->setPlaceRate($this->faker->numberBetween(0, 5 ));
             $place->setStatus("ON");
             $place->setDept($this->faker->numberBetween(1, 95 ));
 
@@ -82,16 +77,6 @@ private $userPasswordHasher;
             $manager->persist($place);
             $manager->flush();
 
-            for ($j=0; $j < 3 ; $j++) {
-                $ratePlaces = New RatePlaces();
-
-                $ratePlaces->setIdPlace($place);
-                $ratePlaces->setIdUser($userUser);
-                $ratePlaces->setRate($this->faker->numberBetween(0, 5 ));
-    
-                $manager->persist($ratePlaces);
-                $manager->flush();
-            }
             
         }
     }

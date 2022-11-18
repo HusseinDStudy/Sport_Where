@@ -29,14 +29,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\OneToMany(mappedBy: 'idUser', targetEntity: RatePlaces::class)]
-    private Collection $ratePlaces;
-
-    public function __construct()
-    {
-        $this->ratePlaces = new ArrayCollection();
-    }
-
     public function getId(): ?int
     {
         return $this->id;
@@ -105,35 +97,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
-    }
-
-    /**
-     * @return Collection<int, RatePlaces>
-     */
-    public function getRatePlaces(): Collection
-    {
-        return $this->ratePlaces;
-    }
-
-    public function addRatePlace(RatePlaces $ratePlace): self
-    {
-        if (!$this->ratePlaces->contains($ratePlace)) {
-            $this->ratePlaces->add($ratePlace);
-            $ratePlace->setIdUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeRatePlace(RatePlaces $ratePlace): self
-    {
-        if ($this->ratePlaces->removeElement($ratePlace)) {
-            // set the owning side to null (unless already changed)
-            if ($ratePlace->getIdUser() === $this) {
-                $ratePlace->setIdUser(null);
-            }
-        }
-
-        return $this;
     }
 }

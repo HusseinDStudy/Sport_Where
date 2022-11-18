@@ -5,11 +5,10 @@ namespace App\Entity;
 use App\Repository\CoachRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-//use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Groups as GForAnnotations;
 use JMS\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-
 use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
@@ -31,6 +30,9 @@ class Coach
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['createUpdatePlace'])]
+    #[GForAnnotations(['createUpdatePlace'])]
+
     private ?int $id = null;
 
     #[ORM\OneToMany(mappedBy: 'coach', targetEntity: Place::class)]
@@ -40,6 +42,7 @@ class Coach
     #[Assert\NotNull()]
     #[ORM\Column(length: 20, nullable: true)]
     #[Groups(['getPlace','getCoach'])]
+    #[GForAnnotations(['getPlace','getCoach'])]
     private ?string $coachPhoneNumber = null;
 
     #[ORM\Column(length: 20)]
@@ -50,6 +53,7 @@ class Coach
     #[Assert\Length(min: 3, minMessage: "Le nom du coach doit faire plus de {{ limit }} caractères")]
     #[ORM\Column(length: 255)]
     #[Groups(['getPlace','getCoach'])]
+    #[GForAnnotations(['getPlace','getCoach'])]
     private ?string $coachFullName = null;
 
     public function __construct()
@@ -62,6 +66,7 @@ class Coach
         return $this->id;
     }
 
+    //TODO: Remove and Test Without
     /**
      * @return Collection<int, Place>
      */
