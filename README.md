@@ -33,4 +33,4 @@ Dajani Hussein -> HusseinDStudy
 
 
 
-Urgence le commit Hateoas for all casse les methodes POST PUT DELETE  pour COACH ET PLACE (sauf delete place marchait pas avant) + TODO: Supprime RatePlace
+Toutes les méthodes marche sur POSTMAN avec la nomenclature snake case par contre sur l'api doc problème de nomenclature (modèle en kamel à la place de snake case) sur les méthode POST et PUT.
