@@ -33,4 +33,4 @@ Dajani Hussein -> HusseinDStudy
 
 
 
-Urgence le commit Hateoas for all casse les methodes POST PUT DELETE  pour COACH ET PLACE (sauf delete place marchait pas avant)
+Urgence le commit Hateoas for all casse les methodes POST PUT DELETE  pour COACH ET PLACE (sauf delete place marchait pas avant) + TODO: Supprime RatePlace
