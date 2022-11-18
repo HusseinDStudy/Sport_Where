@@ -27,10 +27,16 @@ Pousser la base de données en local avec de fausses données avec appFixtures.
 
 Puis démarrer le server Symfony avec "symfony serve"
 
-Compte Admin : login -> admin
-               mdp -> password
+Compte Admin : ``` json {
+
+"username": "admin",
+
+"password": "password"
+
+}```
                
 Compte User : login -> user
+
                mdp -> password
 
 
