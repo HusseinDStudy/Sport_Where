@@ -1,6 +1,6 @@
 # ⚠ Informations
 
-Toutes les méthodes marche sur POSTMAN avec la nomenclature snake_case par contre sur l'api doc problème de nomenclature (modèle en camelCase à la place de snake_case) sur les méthode POST et PUT. Pour l'api doc la methode POST place manque le idCoach. Le invalidate token fonctionne seulement sur POSTMAN.
+Toutes les méthodes marche sur POSTMAN avec la nomenclature snake_case par contre sur l'api doc problème de nomenclature (modèle en camelCase à la place de snake_case) sur les méthode POST et PUT. Pour l'api doc la methode POST place manque le idCoach. Le invalidate token fonctionne seulement sur POSTMAN. L'api de refresh_Token de l'api doc ne fonctionne pas car ca devrait etre un Get et non pas un Post
 
 # 💪 Sport'Where
 
