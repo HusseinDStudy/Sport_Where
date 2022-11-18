@@ -76,7 +76,7 @@ Compte User [Format]:
 }
 ```
 
-#### URL manquant sur l'API doc
+## URL manquant sur l'API doc
 http://127.0.0.1:8000/api/token/invalidate
 
 # 💻 Groupe de travail
