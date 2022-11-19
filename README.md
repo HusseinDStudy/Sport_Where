@@ -1,9 +1,8 @@
 # ⚠ Informations
 
 - Toutes les méthodes marche sur POSTMAN avec la nomenclature snake_case par contre sur l'api doc problème de nomenclature (modèle en camelCase à la place de snake_case) sur les méthode POST et PUT. 
+  - Car la methode deserialize de JMS\Serializer\SerializerInterface a besoin de camel case en saisie
 - Pour l'api doc la methode POST place manque le idCoach. 
-- Le invalidate token fonctionne seulement sur POSTMAN. 
-- Le refresh_Token sur l'api doc ne fonctionne pas car la methode utilisée est un Get à la place d'un Post.
 
 # 💪 Sport'Where
 
@@ -20,6 +19,10 @@ git clone https://github.com/HusseinDStudy/Sport_Where.git
 # 📖 Usages
 
 Ouvrir le terminal et faire "composer install"
+
+Crée ses clés privés et publics.
+
+- php bin/console lexik:jwt:generate-keypair
 
 Pousser la base de données en local avec de fausses données avec appFixtures.
 
@@ -79,14 +82,6 @@ Compte User [Format]:
 }
 ```
 
-## URL manquant sur l'API doc
-http://127.0.0.1:8000/api/token/invalidate
-```json
-{
-  "refresh_token": "string"
-}
-
-```
 # 💻 Groupe de travail
 
 Noel Thomas -> JLWear

@@ -11,7 +11,7 @@ nelmio_api_doc:
     models: { use_jms: false }
     documentation:
         info:
-            title: BileMoAPI
+            title: Sport_WhereAPI
             description: This is an awesome API REST for BileMo!
             version: 1.0.0
         components:
@@ -28,7 +28,7 @@ nelmio_api_doc:
             /api/login_check:
                 post:
                     tags:
-                        - Login
+                        - Auth
                     summary: Login into the api.
                     requestBody:
                         content:
@@ -61,7 +61,7 @@ nelmio_api_doc:
             /api/token/refresh:
                 post:
                     tags:
-                        - Login
+                        - Auth
                     summary: Login into the api by refresh token.
                     requestBody:
                         content:
@@ -87,8 +87,37 @@ nelmio_api_doc:
                             description: An authentication exception occurred.
                     security: []
 
+            /api/token/invalidate:
+                post:
+                    tags:
+                        - Auth
+                    summary: Invalidate refresh token.
+                    requestBody:
+                        content:
+                            application/json:
+                                schema:
+                                    properties:
+                                        refresh_token:
+                                            type: string
+                                    type: object
+                    responses:
+                        "200":
+                            description: OK
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: int
+                                            message:
+                                                type: string
+                        "401":
+                            description: An authentication exception occurred.
+                    security: []
+
     areas: # to filter documented areas
         path_patterns:
-            - ^/api(?!(/doc|/doc.json|/token/refresh)$)
+            - ^/api(?!(/doc|/doc.json|/token/refresh|token/invalidate)$)
         #host_patterns:
         #    - ^/apissss
