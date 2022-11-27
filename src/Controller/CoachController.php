@@ -86,7 +86,7 @@ class CoachController extends AbstractController
      * @return JsonResponse
      */
     #[OA\Tag(name: 'Coach')]
-    #[OA\Response(response: '204', description: 'NO CONTENT', content: null)]
+    #[OA\Response(response: '204', description: 'No Content', content: null)]
     #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[Route('/api/coachs/{idCoach}', name: 'coach.delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
@@ -112,7 +112,8 @@ class CoachController extends AbstractController
      */
     #[OA\Tag(name: 'Coach')]
     #[OA\RequestBody(required: true, content: new Model(type: Coach::class, groups: ["getCoach"]))]
-    #[OA\Response(response: '200', description: 'OK', content: new Model(type: Coach::class, groups: ["getCoach"]))]
+    #[OA\Response(response: '201', description: 'Created', content: new Model(type: Coach::class, groups: ["getCoach"]))]
+    #[OA\Response(response: '400', description: 'Bad Request', content: new OA\JsonContent(example: ["error" => "..."]))]
     #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[Route('/api/coachs', name: 'coach.create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
@@ -149,7 +150,8 @@ class CoachController extends AbstractController
      */
     #[OA\Tag(name: 'Coach')]
     #[OA\RequestBody(required: true, content: new Model(type: Coach::class, groups: ["getCoach"]))]
-    #[OA\Response(response: '200', description: 'OK', content: new Model(type: Coach::class, groups: ["getCoach"]))]
+    #[OA\Response(response: '200', description: 'Ok', content: new Model(type: Coach::class, groups: ["getCoach"]))]
+    #[OA\Response(response: '400', description: 'Bad Request', content: new OA\JsonContent(example: ["error" => "..."]))]
     #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[Route('/api/coachs/{id}', name: 'coach.update', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
@@ -159,10 +161,7 @@ class CoachController extends AbstractController
         $updatedCoach = $serializer->deserialize($request->getContent(), Coach::class, 'json');
         $coach->setCoachFullName($updatedCoach->getCoachFullName() ? $updatedCoach->getCoachFullName() : $coach->getCoachFullName() );
         $coach->setCoachPhoneNumber($updatedCoach->getCoachPhoneNumber() ? $updatedCoach->getCoachPhoneNumber() : $coach->getCoachPhoneNumber() );
-
         $coach->setStatus('ON');
-
-        $location = $urlGenerator->generate('coach.get', ['idCoach' => $coach->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $errors = $validator->validate($coach);
         if ($errors->count() > 0){
@@ -170,6 +169,8 @@ class CoachController extends AbstractController
         }
         $entityManager->persist($coach);
         $entityManager->flush();
+
+        $location = $urlGenerator->generate('coach.get', ['idCoach' => $coach->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
         $context = SerializationContext::create()->setGroups(['getCoach']);
         $jsonCoach = $serializer->serialize($coach, "json", $context);
         return new JsonResponse($jsonCoach, Response::HTTP_CREATED, ['Location' => $location], true);

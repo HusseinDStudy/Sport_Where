@@ -37,7 +37,7 @@ class PlaceController extends AbstractController
      * @return JsonResponse
      */
     #[OA\Tag(name: 'Place')]
-    #[OA\Response(response: '200', description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: Place::class, groups: ["getPlace"]))))]
+    #[OA\Response(response: '200', description: 'Ok', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: Place::class, groups: ["getPlace"]))))]
     #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[OA\Parameter(name: 'page', in: 'query', example: '1')]
     #[OA\Parameter(name: 'limit', in: 'query', example: '5')]
@@ -72,7 +72,7 @@ class PlaceController extends AbstractController
      * @return JsonResponse
      */
     #[OA\Tag(name: 'Place')]
-    #[OA\Response(response: '200', description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: Place::class, groups: ["getPlace"]))))]
+    #[OA\Response(response: '200', description: 'Ok', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: Place::class, groups: ["getPlace"]))))]
     #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[OA\Response(response: '422', description: 'Unprocessable Content', content: new OA\JsonContent(example: ['message'=>'votre  $dept n\'est pad valide']))]
     #[OA\Parameter(name: 'page', in: 'query', example: '1')]
@@ -126,7 +126,7 @@ class PlaceController extends AbstractController
      * @return JsonResponse
      */
     #[OA\Tag(name: 'Place')]
-    #[OA\Response(response: '200', description: 'OK', content: new Model(type: Place::class, groups: ["getPlace"]))]
+    #[OA\Response(response: '200', description: 'Ok', content: new Model(type: Place::class, groups: ["getPlace"]))]
     #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[Route('/api/places/{idPlace}', name: 'places.get', methods: ['GET'])]
     #[IsGranted('ROLE_USER', message: 'Erreur vous n\'avez pas accès à ceci !')]
@@ -152,7 +152,7 @@ class PlaceController extends AbstractController
      * @return JsonResponse
      */
     #[OA\Tag(name: 'Place')]
-    #[OA\Response(response: '204', description: 'NO CONTENT', content: null)]
+    #[OA\Response(response: '204', description: 'No Content', content: null)]
     #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[Route('/api/places/{idPlace}', name: 'places.delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
@@ -179,7 +179,8 @@ class PlaceController extends AbstractController
      */
     #[OA\Tag(name: 'Place')]
     #[OA\RequestBody(required: true, content: new Model( type: Place::class, groups: ["createUpdatePlace"]))]
-    #[OA\Response(response: '200', description: 'OK', content: new Model(type: Place::class, groups: ["getPlace"]))]
+    #[OA\Response(response: '201', description: 'Created', content: new Model(type: Place::class, groups: ["getPlace"]))]
+    #[OA\Response(response: '400', description: 'Bad Request', content: new OA\JsonContent(example: ["error" => "..."]))]
     #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[Route('/api/places', name: 'places.create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
@@ -189,8 +190,9 @@ class PlaceController extends AbstractController
         $place = $serializer->deserialize($request->getContent(), Place::class, 'json');
         $place->setStatus('ON');
         $content = $request->toArray();
-        $idCoach = $content["idCoach"];
+        $idCoach = $content["coach"]["id"];
         $place->setCoach($coachRepository->find($idCoach));
+
         $errors = $validator->validate($place);
         if ($errors->count() > 0){
             return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
@@ -218,7 +220,8 @@ class PlaceController extends AbstractController
      */
     #[OA\Tag(name: 'Place')]
     #[OA\RequestBody(required: true, content: new Model(type: Place::class, groups: ["createUpdatePlace"]))]
-    #[OA\Response(response: '200', description: 'OK', content: new Model(type: Place::class, groups: ["getPlace"]))]
+    #[OA\Response(response: '200', description: 'Ok', content: new Model(type: Place::class, groups: ["getPlace"]))]
+    #[OA\Response(response: '400', description: 'Bad Request', content: new OA\JsonContent(example: ["error" => "..."]))]
     #[OA\Response(response: '401', description: 'Unauthorized', content: new OA\JsonContent(example: ["code" => 401, "message" => "Invalid/Expired JWT Token"]))]
     #[Route('/api/places/{id}', name: 'places.update', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Erreur vous n\'avez pas accès à ceci !')]
@@ -226,7 +229,6 @@ class PlaceController extends AbstractController
     {
         $cache->invalidateTags(["placeCache"]);
         $updatedPlace = $serializer->deserialize($request->getContent(), Place::class, 'json');
-
         $place->setPlaceName($updatedPlace->getPlaceName() ? $updatedPlace->getPlaceName() : $place->getPlaceName() );
         $place->setPlaceAddress($updatedPlace->getPlaceAddress() ? $updatedPlace->getPlaceAddress() : $place->getPlaceAddress() );
         $place->setPlaceCity($updatedPlace->getPlaceCity() ? $updatedPlace->getPlaceCity() : $place->getPlaceCity() );
@@ -236,15 +238,14 @@ class PlaceController extends AbstractController
         $place->setDept($updatedPlace->getDept() ? $updatedPlace->getDept() : $place->getDept() );
         $place->setStatus('ON');
 
-        $location = $urlGenerator->generate('places.get', ['idPlace' => $place->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
-
         $errors = $validator->validate($place);
         if ($errors->count() > 0){
             return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
-
         $entityManager->persist($place);
         $entityManager->flush();
+
+        $location = $urlGenerator->generate('places.get', ['idPlace' => $place->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
         $context = SerializationContext::create()->setGroups(['getPlace']);
         $jsonPlace = $serializer->serialize($place, "json", $context);
         return new JsonResponse($jsonPlace, Response::HTTP_CREATED, ['Location' => $location], true);
