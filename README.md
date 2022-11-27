@@ -33,6 +33,9 @@ Pousser la base de données en local avec de fausses données avec appFixtures.
 
 Puis démarrer le server Symfony avec "symfony serve"
 
+Pour supprimer le cache
+- ```php bin/console cache:clear```
+
 ## Url de documentation
 
 ```http://127.0.0.1:8000/api/doc```
